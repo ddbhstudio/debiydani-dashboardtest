@@ -2,11 +2,25 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Debi & Dani Dashboard</title>
-  <script type="module" crossorigin src="./assets/app.js"></script>
+  <title>Debi & Dani — Finanzas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body style="margin:0;background:#0b0f14;color:#e5e7eb;font-family:system-ui">
-  <div id="root"></div>
+<body>
+  <header>
+    <h1>Debi & Dani</h1>
+    <p>Control financiero compartido</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Trabajos</h2>
+      <button id="loadJobs">Cargar trabajos</button>
+      <p id="jobsCount">Trabajos cargados: 0</p>
+      <ul id="jobsList"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
