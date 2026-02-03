@@ -1,95 +1,35 @@
-#lock {
-  position: fixed;
-  inset: 0;
-  background: #0b0e14;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lock-card {
-  background: #151a22;
-  padding: 40px;
-  border-radius: 12px;
-  width: 280px;
-  text-align: center;
-}
-
-.lock-card input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  background: #0b0e14;
-  color: white;
-  border: 1px solid #333;
-}
-
-.lock-card button {
-  width: 100%;
-  padding: 10px;
-  background: #6c63ff;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
 body {
-  font-family: system-ui, sans-serif;
   margin: 0;
-  background: #0f172a;
+  font-family: system-ui, sans-serif;
+  background: #0b0f14;
   color: #e5e7eb;
 }
 
 header {
-  background: #020617;
-  padding: 16px;
-}
-
-h1 {
-  margin: 0 0 10px;
+  padding: 20px;
+  background: #0f172a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 nav button {
-  margin-right: 8px;
-  padding: 8px 12px;
+  margin-left: 10px;
   background: #1e293b;
-  color: white;
   border: none;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-nav button.active {
-  background: #6366f1;
-}
-
-main {
+.tab {
+  display: none;
   padding: 20px;
 }
 
-form {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-form button {
-  grid-column: span 4;
-  padding: 10px;
-  background: #22c55e;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  border-bottom: 1px solid #334155;
-  padding: 8px;
+.tab.active {
+  display: block;
 }
 
 .cards {
@@ -98,8 +38,48 @@ th, td {
 }
 
 .card {
-  background: #1e293b;
+  background: #020617;
   padding: 20px;
-  border-radius: 8px;
-  font-size: 20px;
+  border-radius: 16px;
+  flex: 1;
+  box-shadow: 0 0 20px rgba(56,189,248,0.15);
+}
+
+.card p {
+  font-size: 28px;
+}
+
+.summary {
+  margin-top: 20px;
+  font-size: 18px;
+  opacity: 0.85;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #020617;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.hidden {
+  display: none;
 }
