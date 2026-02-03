@@ -2,205 +2,57 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Debi & Dani – Dashboard</title>
-
-  <!-- Ocultar de buscadores -->
-  <meta name="robots" content="noindex, nofollow" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-    }
-
-    h1, h2 {
-      margin-top: 0;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 24px;
-    }
-
-    .card {
-      background: #020617;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4);
-    }
-
-    input, select, button {
-      background: #020617;
-      border: 1px solid #334155;
-      color: #e5e7eb;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    button {
-      cursor: pointer;
-      background: #6366f1;
-      border: none;
-      font-weight: 600;
-    }
-
-    button:hover {
-      background: #4f46e5;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    th, td {
-      border-bottom: 1px solid #1e293b;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      color: #93c5fd;
-      font-weight: 600;
-    }
-
-    .grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .grid-2 {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-
-    .balances {
-      display: flex;
-      gap: 20px;
-      font-size: 18px;
-    }
-
-    .balance-box {
-      flex: 1;
-      background: #020617;
-      border-radius: 10px;
-      padding: 16px;
-    }
-
-    .summary {
-      margin-top: 10px;
-      font-weight: 600;
-      color: #facc15;
-    }
-
-    .login {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  </style>
+  <title>Debi & Dani – Finance Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="login">
+<h1>Debi & Dani – Dashboard</h1>
+
+<section class="cards">
   <div class="card">
-    <h2>Acceso privado</h2>
-    <input id="password" type="password" placeholder="Password" />
-    <br /><br />
-    <button onclick="login()">Entrar</button>
+    <h2>Dani</h2>
+    <p id="balance-dani"></p>
+    <small>(50% trabajos – 50% gastos – trabajos cobrados por Dani + gastos pagados por Dani)</small>
   </div>
-</div>
+  <div class="card">
+    <h2>Debi</h2>
+    <p id="balance-debi"></p>
+    <small>(50% trabajos – 50% gastos – trabajos cobrados por Debi + gastos pagados por Debi)</small>
+  </div>
+</section>
 
-<!-- APP -->
-<div id="app" class="hidden">
-  <div class="container">
-    <h1>Debi & Dani — Dashboard</h1>
+<section>
+  <h2>Cargar trabajo (facturación)</h2>
+  <input id="job-fecha" type="date">
+  <input id="job-concepto" placeholder="Concepto">
+  <input id="job-monto" type="number" placeholder="Monto USD">
+  <select id="job-recibio">
+    <option>Dani</option>
+    <option>Debi</option>
+  </select>
+  <input id="job-notas" placeholder="Notas">
+  <button type="button" onclick="confirmarTrabajo()">Guardar trabajo</button>
+</section>
 
-    <!-- BALANCES -->
-    <div class="card balances">
-      <div class="balance-box">
-        Dani<br />
-        <strong>USD <span id="balance-dani">0</span></strong>
-      </div>
-      <div class="balance-box">
-        Debi<br />
-        <strong>USD <span id="balance-debi">0</span></strong>
-      </div>
-    </div>
+<section>
+  <h2>Trabajos</h2>
+  <table id="jobs-table"></table>
+</section>
 
-    <div class="summary card" id="balance-summary"></div>
+<section>
+  <h2>Gastos compartidos</h2>
+  <table id="expenses-table"></table>
+</section>
 
-    <!-- NUEVO TRABAJO -->
-    <div class="card">
-      <h2>Cargar nuevo trabajo</h2>
-
-      <div class="grid grid-2">
-        <input id="job-fecha" type="date" />
-        <input id="job-concepto" placeholder="Concepto" />
-        <input id="job-monto" type="number" placeholder="Monto USD" />
-        <select id="job-pagado">
-          <option value="Dani">Pagó Dani</option>
-          <option value="Debi">Pagó Debi</option>
-        </select>
-
-           <!-- GUARDAR -->
-        <button onclick="crearTrabajoDesdeForm()">
-        Guardar trabajo
-        </button>
-      </div>
-
-      <br />
-      <button onclick="guardarTrabajo()">Guardar trabajo</button>
-    </div>
-
-    <!-- TRABAJOS -->
-    <div class="card">
-      <h2>Trabajos</h2>
-      <table id="jobs-table"></table>
-    </div>
-
-    <!-- GASTOS -->
-    <div class="card">
-      <h2>Gastos compartidos</h2>
-      <table id="expenses-table"></table>
-    </div>
-
-  
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <p id="modal-text"></p>
+    <button onclick="confirmarEnvio()">Confirmar</button>
+    <button onclick="cerrarModal()">Cancelar</button>
   </div>
 </div>
 
 <script src="app.js"></script>
-
-<script>
-  function login() {
-    const pass = document.getElementById("password").value;
-    if (pass === "1234") {
-      localStorage.setItem("auth", "ok");
-      document.getElementById("login").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-    } else {
-      alert("Password incorrecto");
-    }
-  }
-
-  if (localStorage.getItem("auth") === "ok") {
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-  }
-</script>
-
 </body>
 </html>
