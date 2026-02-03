@@ -1,5 +1,56 @@
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+
+function limpiarFormTrabajo() {
+  document.getElementById("job-fecha").value = "";
+  document.getElementById("job-concepto").value = "";
+  document.getElementById("job-monto").value = "";
+  document.getElementById("job-pagado").value = "Dani";
+}
+
+async function crearTrabajoDesdeForm() {
+  const fecha = document.getElementById("job-fecha").value;
+  const concepto = document.getElementById("job-concepto").value;
+  const monto = document.getElementById("job-monto").value;
+  const pagado = document.getElementById("job-pagado").value;
+
+  if (!fecha || !concepto || !monto) {
+    alert("Completá todos los campos");
+    return;
+  }
+
+  const body = {
+    type: "Jobs",
+    payload: {
+      Fecha: fecha,
+      Concepto: concepto,
+      Monto_USD: Number(monto),
+      Pagado: pagado,
+      Notas: ""
+    }
+  };
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const json = await res.json();
+
+    if (json.status !== "ok") {
+      alert("Error al guardar");
+      return;
+    }
+
+    await loadJobs();
+    renderDashboard();
+    limpiarFormTrabajo();
+  } catch (err) {
+    alert("Error de red");
+    console.error(err);
+  }
+}
 
 const state = {
   jobs: [],
