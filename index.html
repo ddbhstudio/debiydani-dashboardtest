@@ -2,25 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Debi & Dani — Finanzas</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+  <title>Debi & Dani — Control</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>Debi & Dani</h1>
-    <p>Control financiero compartido</p>
+    <nav>
+      <button data-tab="jobs" class="active">Trabajos</button>
+      <button data-tab="resumen">Resumen</button>
+    </nav>
   </header>
 
   <main>
-    <section class="card">
-      <h2>Trabajos</h2>
-      <button id="loadJobs">Cargar trabajos</button>
-      <p id="jobsCount">Trabajos cargados: 0</p>
-      <ul id="jobsList"></ul>
+    <section id="jobs" class="tab active">
+      <h2>Cargar trabajo</h2>
+
+      <form id="jobForm">
+        <input name="Cliente" placeholder="Cliente" required />
+        <input name="Concepto" placeholder="Concepto" required />
+        <input name="Monto" type="number" placeholder="Monto ARS" required />
+        <select name="Facturo">
+          <option>Dani</option>
+          <option>Debi</option>
+        </select>
+        <button type="submit">Guardar</button>
+      </form>
+
+      <h2>Trabajos cargados</h2>
+      <table id="jobsTable">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Facturó</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="resumen" class="tab">
+      <h2>Resumen</h2>
+      <div class="cards">
+        <div class="card" id="totalDani">Dani: $0</div>
+        <div class="card" id="totalDebi">Debi: $0</div>
+      </div>
     </section>
   </main>
 
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
