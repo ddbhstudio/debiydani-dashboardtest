@@ -1,112 +1,108 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
 
-const state = {
-  jobs: [],
-  expenses: [],
-  pendingPayload: null
-};
+const state = { jobs: [], expenses: [], pending: null };
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
-  await Promise.all([loadJobs(), loadExpenses()]);
-  renderDashboard();
+  await Promise.all([load("Jobs"), load("Expenses")]);
+  updateEntryType();
+  render();
 }
 
-async function fetchSheet(type) {
+function showTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+async function load(type) {
   const res = await fetch(`${API_URL}?type=${type}`);
-  return res.json();
+  state[type.toLowerCase()] = await res.json();
 }
 
-async function loadJobs() {
-  state.jobs = await fetchSheet("Jobs");
-}
-
-async function loadExpenses() {
-  state.expenses = await fetchSheet("Expenses");
-}
-
-function computeBalances() {
+function compute() {
   let dani = 0, debi = 0;
 
   state.jobs.forEach(j => {
-    const m = Number(j.Monto_USD || 0);
-    dani += m / 2;
-    debi += m / 2;
-
-    if (j.Recibio === "Dani") dani -= m;
-    if (j.Recibio === "Debi") debi -= m;
+    const m = Number(j.Monto_USD||0);
+    dani += m/2; debi += m/2;
+    if (j.Recibio==="Dani") dani -= m;
+    if (j.Recibio==="Debi") debi -= m;
   });
 
   state.expenses.forEach(e => {
-    const m = Number(e.Monto_USD || 0);
-    dani -= m / 2;
-    debi -= m / 2;
-
-    if (e.Pago === "Dani") dani += m;
-    if (e.Pago === "Debi") debi += m;
+    const m = Number(e.Monto_USD||0);
+    dani -= m/2; debi -= m/2;
+    if (e.Pago==="Dani") dani += m;
+    if (e.Pago==="Debi") debi += m;
   });
 
   return { dani, debi };
 }
 
-function renderDashboard() {
-  const { dani, debi } = computeBalances();
-  document.getElementById("balance-dani").innerText = format(dani);
-  document.getElementById("balance-debi").innerText = format(debi);
+function render() {
+  const { dani, debi } = compute();
+  document.getElementById("balance-dani").innerText = usd(dani);
+  document.getElementById("balance-debi").innerText = usd(debi);
 
-  renderTable("jobs-table", state.jobs, ["Fecha","Concepto","Monto_USD","Recibio","Notas","Pagado"]);
-  renderTable("expenses-table", state.expenses, ["Fecha","Concepto","Monto_USD","Pago","Notas"]);
+  const diff = dani - debi;
+  const s = document.getElementById("balance-summary");
+
+  if (Math.abs(diff)<0.01) s.innerText="Cuentas equilibradas";
+  else if (diff>0) s.innerText=`Debi le debe a Dani ${usd(diff)}`;
+  else s.innerText=`Dani le debe a Debi ${usd(-diff)}`;
+
+  draw("jobs-table", state.jobs);
+  draw("expenses-table", state.expenses);
 }
 
-function renderTable(id, rows, cols) {
-  const table = document.getElementById(id);
-  table.innerHTML = "<tr>" + cols.map(c => `<th>${c}</th>`).join("") + "</tr>";
-  rows.forEach(r => {
-    table.innerHTML += "<tr>" + cols.map(c => `<td>${formatDate(r[c])}</td>`).join("") + "</tr>";
-  });
+function draw(id, rows) {
+  const t = document.getElementById(id);
+  if (!rows.length) return t.innerHTML="";
+  const cols = Object.keys(rows[0]);
+  t.innerHTML =
+    "<tr>"+cols.map(c=>`<th>${c}</th>`).join("")+"</tr>"+
+    rows.map(r=>"<tr>"+cols.map(c=>`<td>${r[c]??""}</td>`).join("")+"</tr>").join("");
 }
 
-function format(n) {
-  return "USD " + Number(n).toLocaleString("en-US",{minimumFractionDigits:2});
+function updateEntryType() {
+  const type = document.getElementById("entry-type").value;
+  const actor = document.getElementById("actor");
+  actor.innerHTML = type==="Jobs"
+    ? `<option>Dani</option><option>Debi</option>`
+    : `<option>Dani</option><option>Debi</option>`;
 }
 
-function formatDate(v) {
-  if (!v) return "";
-  return v.toString().split("T")[0];
-}
-
-/* ==== CONFIRM FLOW ==== */
-
-function confirmarTrabajo() {
+function confirmarEntrada() {
+  const type = document.getElementById("entry-type").value;
   const payload = {
-    Fecha: document.getElementById("job-fecha").value,
-    Concepto: document.getElementById("job-concepto").value,
-    Monto_USD: Number(document.getElementById("job-monto").value),
-    Recibio: document.getElementById("job-recibio").value,
-    Notas: document.getElementById("job-notas").value,
-    Pagado: false
+    Fecha: document.getElementById("fecha").value,
+    Concepto: document.getElementById("concepto").value,
+    Monto_USD: Number(document.getElementById("monto").value),
+    Notas: document.getElementById("notas").value,
+    ...(type==="Jobs"
+      ? { Recibio: document.getElementById("actor").value }
+      : { Pago: document.getElementById("actor").value })
   };
 
-  state.pendingPayload = { type: "Jobs", payload };
-
+  state.pending = { type, payload };
   document.getElementById("modal-text").innerText =
-    `Vas a cargar:\n${payload.Concepto}\nUSD ${payload.Monto_USD}\nRecibió: ${payload.Recibio}\nNotas: ${payload.Notas}`;
-
+    `${type==="Jobs"?"Trabajo":"Gasto"}\n${payload.Concepto}\nUSD ${payload.Monto_USD}`;
   document.getElementById("modal").classList.remove("hidden");
 }
 
-async function confirmarEnvio() {
+async function enviarEntrada() {
   await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(state.pendingPayload),
-    headers: { "Content-Type": "application/json" }
+    method:"POST",
+    body: JSON.stringify(state.pending),
+    headers:{ "Content-Type":"application/json" }
   });
   cerrarModal();
-  await loadJobs();
-  renderDashboard();
+  await init();
 }
 
 function cerrarModal() {
   document.getElementById("modal").classList.add("hidden");
 }
+
+function usd(n){return "USD "+Number(n).toLocaleString("en-US",{minimumFractionDigits:2});}
