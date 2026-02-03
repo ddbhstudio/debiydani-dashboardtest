@@ -12,3 +12,21 @@ async function createJob(data) {
     body: JSON.stringify({ type: "Jobs", data })
   });
 }
+
+function unlock() {
+  const p = document.getElementById("pass").value;
+  if (p === "1234") {
+    localStorage.setItem("vault_unlocked", "1");
+    document.getElementById("lock").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    init();
+  } else {
+    document.getElementById("err").innerText = "Password incorrecto";
+  }
+}
+
+if (localStorage.getItem("vault_unlocked") === "1") {
+  document.getElementById("lock").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  init();
+}
