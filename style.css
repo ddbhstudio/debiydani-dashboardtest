@@ -1,3 +1,38 @@
+#lock {
+  position: fixed;
+  inset: 0;
+  background: #0b0e14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-card {
+  background: #151a22;
+  padding: 40px;
+  border-radius: 12px;
+  width: 280px;
+  text-align: center;
+}
+
+.lock-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background: #0b0e14;
+  color: white;
+  border: 1px solid #333;
+}
+
+.lock-card button {
+  width: 100%;
+  padding: 10px;
+  background: #6c63ff;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
