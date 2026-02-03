@@ -2,71 +2,61 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Debi & Dani – Vault</title>
+  <title>Debi & Dani — Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<header>
-  <h1>Debi & Dani</h1>
-  <nav>
-    <button onclick="showTab('dashboard')">Dashboard</button>
-    <button onclick="showTab('jobs')">Trabajos</button>
-    <button onclick="showTab('expenses')">Gastos</button>
-    <button onclick="showTab('new')">Nueva entrada</button>
-  </nav>
+<!-- DASHBOARD -->
+<header class="dashboard">
+  <div class="card dani">
+    <h3>Dani</h3>
+    <div id="balance-dani" class="amount">USD 0</div>
+    <small>(Ingresos/2 − Gastos/2 ± Pagos)</small>
+  </div>
+
+  <div class="card debi">
+    <h3>Debi</h3>
+    <div id="balance-debi" class="amount">USD 0</div>
+    <small>(Ingresos/2 − Gastos/2 ± Pagos)</small>
+  </div>
+
+  <div id="balance-summary" class="summary"></div>
 </header>
 
-<section id="dashboard" class="tab active">
-  <div class="cards">
-    <div class="card">
-      <h2>Dani</h2>
-      <p id="balance-dani"></p>
-    </div>
-    <div class="card">
-      <h2>Debi</h2>
-      <p id="balance-debi"></p>
-    </div>
-  </div>
-  <p id="balance-summary" class="summary"></p>
+<!-- TABS -->
+<section class="tabs">
+  <button onclick="showTab('jobs')" class="active">Trabajos</button>
+  <button onclick="showTab('expenses')">Gastos</button>
 </section>
 
-<section id="jobs" class="tab">
-  <h2>Trabajos</h2>
-  <table id="jobs-table"></table>
-</section>
+<!-- CONTENT -->
+<main>
+  <table id="jobs-table" class="data-table"></table>
+  <table id="expenses-table" class="data-table hidden"></table>
+</main>
 
-<section id="expenses" class="tab">
-  <h2>Gastos</h2>
-  <table id="expenses-table"></table>
-</section>
-
-<section id="new" class="tab">
-  <h2>Nueva entrada / salida</h2>
-
-  <select id="entry-type" onchange="updateEntryType()">
-    <option value="Jobs">Trabajo (Ingreso)</option>
-    <option value="Expenses">Gasto (Salida)</option>
+<!-- INPUT BAR -->
+<footer class="entry-bar">
+  <select id="entry-type">
+    <option value="Jobs">Ingreso</option>
+    <option value="Expenses">Gasto</option>
   </select>
 
-  <input type="date" id="fecha">
-  <input placeholder="Concepto" id="concepto">
-  <input type="number" placeholder="Monto USD" id="monto">
+  <input type="date" id="entry-fecha" />
+  <input type="text" id="entry-concepto" placeholder="Concepto" />
+  <input type="number" id="entry-monto" placeholder="USD" />
 
-  <select id="actor"></select>
+  <select id="entry-persona">
+    <option>Dani</option>
+    <option>Debi</option>
+  </select>
 
-  <input placeholder="Notas" id="notas">
+  <input type="text" id="entry-notas" placeholder="Nota (opcional)" />
 
-  <button onclick="confirmarEntrada()">Confirmar</button>
-</section>
-
-<div id="modal" class="modal hidden">
-  <div class="modal-content">
-    <p id="modal-text"></p>
-    <button onclick="enviarEntrada()">Confirmar</button>
-    <button onclick="cerrarModal()">Cancelar</button>
-  </div>
-</div>
+  <button onclick="confirmarEntrada()">✔</button>
+  <button onclick="limpiarEntrada()">✖</button>
+</footer>
 
 <script src="app.js"></script>
 </body>
