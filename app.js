@@ -1,33 +1,25 @@
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+document.addEventListener("DOMContentLoaded", async () => {
+  load();
 
-const loadBtn = document.getElementById("loadJobs");
-const jobsCount = document.getElementById("jobsCount");
-const jobsList = document.getElementById("jobsList");
+  document.getElementById("jobForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    await createJob(data);
+    e.target.reset();
+    load();
+  });
 
-loadBtn.addEventListener("click", async () => {
-  jobsList.innerHTML = "";
-  jobsCount.textContent = "Cargando...";
-
-  try {
-    const res = await fetch(`${API_URL}?type=Jobs`);
-    const data = await res.json();
-
-    jobsCount.textContent = `Trabajos cargados: ${data.length}`;
-
-    if (data.length === 0) {
-      jobsList.innerHTML = "<li>No hay trabajos aún</li>";
-      return;
-    }
-
-    data.forEach(job => {
-      const li = document.createElement("li");
-      li.textContent = `${job.Cliente || "Cliente"} — ${job.Monto || 0}`;
-      jobsList.appendChild(li);
-    });
-
-  } catch (err) {
-    jobsCount.textContent = "Error cargando datos";
-    console.error(err);
-  }
+  document.querySelectorAll("nav button").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      btn.classList.add("active");
+    };
+  });
 });
+
+async function load() {
+  const jobs = await getJobs();
+  renderJobs(jobs);
+}
