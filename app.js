@@ -141,7 +141,6 @@ function renderJobs() {
 
 function renderExpenses() {
   const table = document.getElementById("expenses-table");
-  if (!table) return;
   table.innerHTML = "";
 
   table.innerHTML = `
