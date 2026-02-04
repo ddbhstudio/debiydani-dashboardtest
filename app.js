@@ -1,182 +1,150 @@
-const API_URL =
-  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+const API_URL = "TU_URL_DEL_SCRIPT";
 
-const PASSWORD = "1234";
-
-const state = {
+let state = {
   jobs: [],
   expenses: [],
-  filter: "ALL",
+  filter: "ALL"
 };
 
-/* =====================
-   INIT
-===================== */
-document.addEventListener("DOMContentLoaded", init);
-
-async function init() {
-  document.getElementById("unlockBtn").onclick = unlock;
+document.addEventListener("DOMContentLoaded", () => {
   console.log("INIT OK");
-}
+});
 
-/* =====================
-   LOCK
-===================== */
-async function unlock() {
-  const val = document.getElementById("passwordInput").value;
-  if (val !== PASSWORD) return alert("Password incorrecto");
+/* AUTH */
+function unlock() {
+  const pass = document.getElementById("passwordInput").value;
+  if (pass !== "1234") return;
 
   document.getElementById("lockScreen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
 
-  await loadAll();
+  loadData();
+}
+
+/* DATA */
+async function loadData() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+
+  state.jobs = data.jobs || [];
+  state.expenses = data.expenses || [];
+
   renderAll();
 }
 
-/* =====================
-   FETCH
-===================== */
-async function fetchSheet(type) {
-  const res = await fetch(`${API_URL}?type=${type}`);
-  if (!res.ok) throw new Error("Fetch error");
-  return res.json();
-}
-
-async function loadAll() {
-  state.jobs = await fetchSheet("Jobs");
-  state.expenses = await fetchSheet("Expenses");
-}
-
-/* =====================
-   CALCULATIONS
-===================== */
+/* CALCS */
 function calcTotals() {
-  let daniIn = 0;
-  let debiIn = 0;
-  let externalIn = 0;
-  let expensesTotal = 0;
+  let daniIn = 0, debiIn = 0, externalIn = 0;
+  let expenses = 0;
 
   state.jobs.forEach(j => {
-    const v = Number(j.Monto_USD || 0);
-    if (j.Factura === "Dani") daniIn += v;
-    else if (j.Factura === "Debi") debiIn += v;
-    else externalIn += v;
+    if (j.Factura === "Dani") daniIn += j.USD;
+    else if (j.Factura === "Debi") debiIn += j.USD;
+    else externalIn += j.USD;
   });
 
-  state.expenses.forEach(e => {
-    expensesTotal += Number(e.Monto_USD || 0);
-  });
+  state.expenses.forEach(e => expenses += e.USD);
 
-  const totalIncome = daniIn + debiIn;
-  const totalProfit = totalIncome - expensesTotal;
+  const totalProfit = daniIn + debiIn - expenses;
   const equilibrium = totalProfit / 2;
 
-  return {
-    daniIn,
-    debiIn,
-    externalIn,
-    expensesTotal,
-    totalProfit,
-    equilibrium,
-  };
+  return { daniIn, debiIn, externalIn, totalProfit, equilibrium };
 }
 
-/* =====================
-   RENDER DASHBOARD
-===================== */
+/* RENDER */
+function safeSet(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = val;
+}
+
 function renderAll() {
   const t = calcTotals();
 
-  document.getElementById("daniTotal").innerText =
-    t.daniIn.toLocaleString("en-US");
-  document.getElementById("debiTotal").innerText =
-    t.debiIn.toLocaleString("en-US");
+  safeSet("daniTotal", Math.round(t.daniIn));
+  safeSet("debiTotal", Math.round(t.debiIn));
+  safeSet("totalProfit", Math.round(t.totalProfit));
+  safeSet("externalPending", Math.round(t.externalIn));
 
-  document.getElementById("gain-dani").innerText =
-    (t.equilibrium - t.debiIn + t.daniIn).toLocaleString("en-US");
+  const gainDani = t.daniIn - t.equilibrium;
+  const gainDebi = t.debiIn - t.equilibrium;
 
-  document.getElementById("gain-debi").innerText =
-    (t.equilibrium - t.daniIn + t.debiIn).toLocaleString("en-US");
+  safeSet("gain-dani", Math.round(gainDani));
+  safeSet("gain-debi", Math.round(gainDebi));
 
-  let balanceText = "Cuentas equilibradas";
-  if (t.daniIn > t.equilibrium) {
-    balanceText = `Debi le debe a Dani ${Math.round(
-      t.daniIn - t.equilibrium
-    ).toLocaleString("en-US")}`;
-  } else if (t.debiIn > t.equilibrium) {
-    balanceText = `Dani le debe a Debi ${Math.round(
-      t.debiIn - t.equilibrium
-    ).toLocaleString("en-US")}`;
-  }
+  let balance = "Equilibrado";
+  if (gainDani > gainDebi) balance = `Debi le debe a Dani ${Math.round(gainDani)}`;
+  if (gainDebi > gainDani) balance = `Dani le debe a Debi ${Math.round(gainDebi)}`;
 
-  document.getElementById("balanceText").innerText = balanceText;
-  document.getElementById("externalPending").innerText =
-    t.externalIn.toLocaleString("en-US");
+  safeSet("balanceText", balance);
 
+  renderJobs();
+  renderExpenses();
+}
+
+/* FILTER */
+function setFilter(f) {
+  state.filter = f;
+  updateTabColor();
   renderJobs();
 }
 
-/* =====================
-   FILTER
-===================== */
-function setFilter(val) {
-  state.filter = val;
-  renderJobs();
+function updateTabColor() {
+  const tab = document.getElementById("tab-jobs");
+  tab.className = "tab active";
+
+  if (state.filter === "Dani") tab.classList.add("dani");
+  else if (state.filter === "Debi") tab.classList.add("debi");
+  else tab.classList.add("green");
 }
 
-/* =====================
-   TABLES
-===================== */
+/* TABLES */
 function renderJobs() {
-  const tbody = document.getElementById("jobsTable");
-  tbody.innerHTML = "";
+  const tb = document.getElementById("jobsTable");
+  tb.innerHTML = "";
 
-  state.jobs.forEach(j => {
-    if (
-      state.filter !== "ALL" &&
-      j.Factura !== state.filter
-    )
-      return;
+  state.jobs
+    .filter(j => state.filter === "ALL" || j.Factura === state.filter)
+    .forEach(j => {
+      const tr = document.createElement("tr");
+      tr.className =
+        j.Factura === "Dani" ? "row-dani" :
+        j.Factura === "Debi" ? "row-debi" : "row-external";
 
+      tr.innerHTML = `
+        <td></td>
+        <td class="center">${j.Cliente || ""}</td>
+        <td class="right">${Math.round(j.USD)}</td>
+        <td class="notes">${j.Notas || ""}</td>
+      `;
+      tb.appendChild(tr);
+    });
+}
+
+function renderExpenses() {
+  const tb = document.getElementById("expensesTable");
+  tb.innerHTML = "";
+
+  state.expenses.forEach(e => {
     const tr = document.createElement("tr");
-    tr.className =
-      j.Factura === "Dani"
-        ? "dani"
-        : j.Factura === "Debi"
-        ? "debi"
-        : "third";
-
     tr.innerHTML = `
-      <td>${j.Concepto || ""}</td>
-      <td class="center">${j.Cliente || ""}</td>
-      <td class="right">${Number(j.Monto_USD || 0).toLocaleString("en-US")}</td>
-      <td class="center notes">${j.Notas || ""}</td>
+      <td></td>
+      <td class="right">${Math.round(e.USD)}</td>
+      <td class="notes">${e.Notas || ""}</td>
     `;
-    tbody.appendChild(tr);
+    tb.appendChild(tr);
   });
 }
 
-/* =====================
-   NEW ENTRY
-===================== */
-async function confirmEntry() {
-  const type = document.getElementById("entryType").value;
-  const payload = {
-    Concepto: document.getElementById("entryConcept").value,
-    Cliente: document.getElementById("entryClient").value,
-    Monto_USD: document.getElementById("entryAmount").value,
-    Factura: document.getElementById("entryWho").value,
-    Notas: document.getElementById("entryNotes").value,
-  };
+/* TABS */
+function showSection(sec) {
+  document.getElementById("jobsSection").classList.toggle("hidden", sec !== "jobs");
+  document.getElementById("expensesSection").classList.toggle("hidden", sec !== "expenses");
 
-  if (!confirm("¿Confirmar transacción?")) return;
+  document.getElementById("tab-jobs").classList.toggle("active", sec === "jobs");
+  document.getElementById("tab-expenses").classList.toggle("active", sec === "expenses");
+}
 
-  await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ type, payload }),
-  });
-
-  await loadAll();
-  renderAll();
-  alert("Transacción guardada");
+/* NEW ENTRY */
+function confirmEntry() {
+  alert("✔ Transacción lista para enviar (hook pendiente)");
 }
