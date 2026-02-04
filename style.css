@@ -256,6 +256,7 @@ th.right {
 }
 
 .notes,
-td.center {
+td.center,
+th.center{
   text-align: center;
 }
