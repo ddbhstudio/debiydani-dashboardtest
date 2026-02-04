@@ -217,6 +217,8 @@ tbody tr.third {
   right: 0;
   background: linear-gradient(to top, #0e1117, #0e111700);
   padding: 16px 24px;
+  justify-content: center;
+  align-items: center;
 }
 
 .newEntry .box {
