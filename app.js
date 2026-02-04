@@ -124,10 +124,10 @@ function renderDashboard() {
 /* ================= TABLES ================= */
 function renderJobs() {
   
-  const table = document.getElementById("jobsTable");
-  if (!table) return; // 🔒 evita el error que estás viendo
-  table.innerHTML = "";
-      table.innerHTML = `
+  const table1 = document.getElementById("jobsTable");
+  if (!table1) return; // 🔒 evita el error que estás viendo
+  table1.innerHTML = "";
+      table1.innerHTML = `
         <thead>
           <tr>
             <th></th>
@@ -162,7 +162,7 @@ function renderJobs() {
       `;
        };
       
-      table.appendChild(tr);
+      table1.appendChild(tr);
     });
 
  </tbody>`;
