@@ -1,14 +1,29 @@
+console.log("app.js cargado"); // 👈 debug visual
+
 /* ================= PASSWORD ================= */
 function unlock() {
-  const pass = document.getElementById("passwordInput").value;
+  const input = document.getElementById("passwordInput");
+  if (!input) {
+    alert("Error: input no encontrado");
+    return;
+  }
 
-  if (pass === "1234") {
+  if (input.value === "1234") {
     document.getElementById("lockScreen").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
-    init(); // recién acá inicializamos la app
+    init(); // 👈 recién acá arrancamos todo
   } else {
     alert("Password incorrecto");
   }
+}
+
+/* ================= INIT ================= */
+async function init() {
+  console.log("INIT OK");
+
+  await loadJobs();
+  await loadExpenses();
+  renderAll();
 }
 
 const API_URL =
@@ -104,6 +119,7 @@ function renderDashboard() {
 /* ================= TABLES ================= */
 function renderJobs() {
   const tbody = document.getElementById("jobsTable");
+  if (!tbody) return; // 🔒 evita el error que estás viendo
   tbody.innerHTML = "";
 
   state.jobs
@@ -132,6 +148,7 @@ function renderJobs() {
 
 function renderExpenses() {
   const table = document.getElementById("expenses-table");
+  if (!table) return;
   table.innerHTML = "";
 
   table.innerHTML = `
@@ -214,3 +231,6 @@ function format(n) {
     maximumFractionDigits: 0,
   });
 }
+
+
+document.getElementById("unlockBtn")?.addEventListener("click", unlock);
