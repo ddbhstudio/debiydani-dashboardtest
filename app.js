@@ -109,10 +109,14 @@ function renderDashboard() {
 
   if (Math.abs(diff) < 0.01) {
     summary.innerText = "Cuentas equilibradas";
-  } else if (diff > 0) {
-    summary.innerText = `Dani le debe a Debi ${format(diff)}`;
   } else {
-    summary.innerText = `Debi le debe a Dani ${format(-diff)}`;
+    const ajuste = Math.abs(diff) / 2;
+  
+    if (diff > 0) {
+      summary.innerText = `Debi le debe a Dani ${format(ajuste)}`;
+    } else {
+      summary.innerText = `Dani le debe a Debi ${format(ajuste)}`;
+    }
   }
 
 }
