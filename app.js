@@ -6,26 +6,14 @@ const state = {
   expenses: [],
 };
 
-let activeFilter = "ALL";
-
 /* =========================
    INIT
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("App init");
-  init();
-});
+document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
-  try {
-    await Promise.all([loadJobs(), loadExpenses()]);
-    console.log("Jobs:", state.jobs);
-    console.log("Expenses:", state.expenses);
-    renderAll();
-    bindCardFilters();
-  } catch (e) {
-    console.error("Init error", e);
-  }
+  await Promise.all([loadJobs(), loadExpenses()]);
+  renderDashboard();
 }
 
 /* =========================
@@ -33,7 +21,7 @@ async function init() {
 ========================= */
 async function fetchSheet(type) {
   const res = await fetch(`${API_URL}?type=${type}`);
-  if (!res.ok) throw new Error("Fetch error: " + type);
+  if (!res.ok) throw new Error("Fetch error");
   return res.json();
 }
 
@@ -48,129 +36,142 @@ async function loadExpenses() {
 }
 
 /* =========================
-   BALANCES
+   CALCULATIONS
 ========================= */
-function computeBalances() {
-  let dani = 0;
-  let debi = 0;
-  let pending = 0;
-  let income = 0;
-  let expenses = 0;
+function computeTotals() {
+  let ingresosDani = 0;
+  let ingresosDebi = 0;
+  let ingresosExternos = 0;
+  let gastosTotales = 0;
 
-  state.jobs.forEach(j => {
+  state.jobs.forEach((j) => {
     const amount = Number(j.Monto_USD || 0);
-    if (!amount) return;
-
-    income += amount;
-
-    if (j.Factura === "Dani") dani += amount;
-    else if (j.Factura === "Debi") debi += amount;
-    else pending += amount;
+    if (j.Factura === "Dani") ingresosDani += amount;
+    else if (j.Factura === "Debi") ingresosDebi += amount;
+    else ingresosExternos += amount;
   });
 
-  state.expenses.forEach(e => {
-    const amount = Number(e.Monto_USD || 0);
-    if (!amount) return;
-
-    expenses += amount;
-
-    if (e.Pagado === "Dani") dani -= amount;
-    else if (e.Pagado === "Debi") debi -= amount;
-    else pending -= amount;
+  state.expenses.forEach((e) => {
+    gastosTotales += Number(e.Monto_USD || 0);
   });
+
+  const ingresosCompartidos = ingresosDani + ingresosDebi;
+
+  const gananciaDani =
+    ingresosCompartidos / 2 - gastosTotales / 2;
+  const gananciaDebi =
+    ingresosCompartidos / 2 - gastosTotales / 2;
+
+  const gananciaTotal =
+    ingresosCompartidos - gastosTotales;
+
+  const diferencia = ingresosDani - ingresosDebi;
 
   return {
-    dani,
-    debi,
-    pending,
-    total: income - expenses,
+    ingresosDani,
+    ingresosDebi,
+    ingresosExternos,
+    gastosTotales,
+    gananciaDani,
+    gananciaDebi,
+    gananciaTotal,
+    diferencia,
   };
-}
-
-/* =========================
-   FILTERS
-========================= */
-function bindCardFilters() {
-  const map = {
-    "card-dani": "Dani",
-    "card-debi": "Debi",
-    "card-total": "ALL",
-    "card-pending": "PENDING",
-  };
-
-  Object.entries(map).forEach(([id, filter]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.cursor = "pointer";
-    el.addEventListener("click", () => {
-      activeFilter = filter;
-      renderTables();
-    });
-  });
 }
 
 /* =========================
    RENDER
 ========================= */
-function renderAll() {
-  renderDashboard();
-  renderTables();
-}
-
 function renderDashboard() {
-  const b = computeBalances();
+  const t = computeTotals();
 
-  setText("balance-dani", b.dani);
-  setText("balance-debi", b.debi);
-  setText("balance-total", b.total);
-  setText("balance-pending", b.pending);
+  // Tarjetas principales
+  setText("balance-dani", t.ingresosDani);
+  setText("balance-debi", t.ingresosDebi);
+  setText("balance-total", t.gananciaTotal);
+  setText("balance-pending", t.ingresosExternos);
+
+  // Subtexto ganancias
+  setText("gain-dani", t.gananciaDani);
+  setText("gain-debi", t.gananciaDebi);
+
+  // Balance
+  const balanceEl = document.getElementById("balance-summary");
+  if (Math.abs(t.diferencia) < 1) {
+    balanceEl.innerText = "Cuentas equilibradas";
+  } else if (t.diferencia > 0) {
+    balanceEl.innerText = `Debi le debe a Dani USD ${format(
+      t.diferencia
+    )}`;
+  } else {
+    balanceEl.innerText = `Dani le debe a Debi USD ${format(
+      Math.abs(t.diferencia)
+    )}`;
+  }
+
+  renderJobsTable();
+  renderExpensesTable();
 }
 
-function renderTables() {
-  let jobs = [...state.jobs];
+/* =========================
+   TABLES
+========================= */
+function renderJobsTable() {
+  const table = document.getElementById("jobs-table");
+  table.innerHTML = "";
 
-  if (activeFilter === "Dani")
-    jobs = jobs.filter(j => j.Factura === "Dani");
-  else if (activeFilter === "Debi")
-    jobs = jobs.filter(j => j.Factura === "Debi");
-  else if (activeFilter === "PENDING")
-    jobs = jobs.filter(j => j.Factura !== "Dani" && j.Factura !== "Debi");
+  const headers = ["", "Cliente", "USD", "Notas"];
 
-  renderTable("jobs-table", jobs);
-  renderTable("expenses-table", state.expenses);
-}
-
-function renderTable(id, rows) {
-  const table = document.getElementById(id);
-  if (!table) return;
-
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th>Concepto</th>
-        <th>Cliente</th>
-        <th class="right">USD</th>
-        <th>Notas</th>
-      </tr>
-    </thead>
-  `;
+  table.innerHTML +=
+    "<thead><tr>" +
+    headers.map((h) => `<th>${h}</th>`).join("") +
+    "</tr></thead>";
 
   const tbody = document.createElement("tbody");
 
-  rows.forEach(r => {
+  state.jobs.forEach((j) => {
     const tr = document.createElement("tr");
 
-    if (r.Factura === "Dani") tr.className = "row-dani";
-    else if (r.Factura === "Debi") tr.className = "row-debi";
-    else tr.className = "row-pending";
+    if (j.Factura === "Dani") tr.classList.add("row-dani");
+    else if (j.Factura === "Debi") tr.classList.add("row-debi");
+    else tr.classList.add("row-external");
 
     tr.innerHTML = `
-      <td>${r.Concepto || ""}</td>
-      <td>${r.Cliente || ""}</td>
-      <td class="right">${format(r.Monto_USD)}</td>
-      <td class="notes">${r.Notas || ""}</td>
+      <td>${j.Concepto || ""}</td>
+      <td class="center">${j.Cliente || ""}</td>
+      <td class="right">${format(j.Monto_USD)}</td>
+      <td class="notes">${j.Notas || ""}</td>
     `;
+    tbody.appendChild(tr);
+  });
 
+  table.appendChild(tbody);
+}
+
+function renderExpensesTable() {
+  const table = document.getElementById("expenses-table");
+  table.innerHTML = "";
+
+  const headers = ["", "USD", "Notas"];
+
+  table.innerHTML +=
+    "<thead><tr>" +
+    headers.map((h) => `<th>${h}</th>`).join("") +
+    "</tr></thead>";
+
+  const tbody = document.createElement("tbody");
+
+  state.expenses.forEach((e) => {
+    const tr = document.createElement("tr");
+
+    if (e.Pagado === "Dani") tr.classList.add("row-dani");
+    else if (e.Pagado === "Debi") tr.classList.add("row-debi");
+
+    tr.innerHTML = `
+      <td>${e.Concepto || ""}</td>
+      <td class="right">${format(e.Monto_USD)}</td>
+      <td class="notes">${e.Notas || ""}</td>
+    `;
     tbody.appendChild(tr);
   });
 
@@ -180,14 +181,11 @@ function renderTable(id, rows) {
 /* =========================
    UTILS
 ========================= */
-function format(n) {
-  return Number(n || 0).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.innerText = format(value);
+}
+
+function format(n) {
+  return Math.round(Number(n || 0)).toLocaleString("en-US");
 }
