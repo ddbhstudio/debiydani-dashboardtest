@@ -416,6 +416,64 @@ function format(n) {
   });
 }
 
+function testPie() {
+  const ctx = document.getElementById("pieChart");
+  if (!ctx) return;
 
+  new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: ["Dani", "Debi", "Externos"],
+      datasets: [{
+        data: [50, 30, 20],
+        backgroundColor: ["#4fc3f7", "#f48fb1", "#9e9e9e"]
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: "bottom" }
+      }
+    }
+  });
+}
+
+function testMonthly() {
+  const ctx = document.getElementById("monthlyChart");
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Ene", "Feb", "Mar", "Abr"],
+      datasets: [
+        {
+          label: "Dani",
+          data: [2000, 3000, 2500, 4000],
+          backgroundColor: "#4fc3f7"
+        },
+        {
+          label: "Debi",
+          data: [1800, 2200, 2600, 3500],
+          backgroundColor: "#f48fb1"
+        },
+        {
+          label: "Total",
+          data: [3800, 5200, 5100, 7500],
+          backgroundColor: "#66bb6a"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      }
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", testMonthly);
+
+document.addEventListener("DOMContentLoaded", testPie);
 
 document.getElementById("unlockBtn")?.addEventListener("click", unlock);
