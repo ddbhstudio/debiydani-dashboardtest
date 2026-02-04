@@ -1,53 +1,44 @@
-const PARTNERS = ["Dani", "Debi"];
+const API_URL =  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
 
-let state = {
+const state = {
   jobs: [],
-  filters: {
-    client: "ALL",
-    partner: "ALL"
-  }
+  expenses: [],
 };
 
-let pieChart;
+let activeFilter = "ALL";
 
-function init(data) {
-  state.jobs = data;
-  buildClientFilters();
-  render();
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", init);
+
+async function init() {
+  await Promise.all([loadJobs(), loadExpenses()]);
+  renderAll();
 }
 
-function buildClientFilters() {
-  const clients = [...new Set(state.jobs.map(j => j.Cliente))];
-  const container = document.getElementById("clientFilters");
-
-  container.innerHTML = `<button data-client="ALL" class="active">Todos</button>`;
-  clients.forEach(c => {
-    const b = document.createElement("button");
-    b.textContent = c;
-    b.dataset.client = c;
-    container.appendChild(b);
-  });
-
-  container.onclick = e => {
-    if (!e.target.dataset.client) return;
-    state.filters.client = e.target.dataset.client;
-    setActive(container, e.target);
-    render();
-  };
-
-  document.querySelector(".partnerFilters").onclick = e => {
-    if (!e.target.dataset.partner) return;
-    state.filters.partner = e.target.dataset.partner;
-    setActive(e.currentTarget, e.target);
-    render();
-  };
+/* =========================
+   FETCH
+========================= */
+async function fetchSheet(type) {
+  const res = await fetch(`${API_URL}?type=${type}`);
+  if (!res.ok) throw new Error("Fetch error");
+  return res.json();
 }
 
-function setActive(container, btn) {
-  container.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
+async function loadJobs() {
+  const data = await fetchSheet("Jobs");
+  state.jobs = Array.isArray(data) ? data : [];
 }
 
+async function loadExpenses() {
+  const data = await fetchSheet("Expenses");
+  state.expenses = Array.isArray(data) ? data : [];
+}
+
+/* =========================
+   BALANCES
+========================= */
 function computeBalances() {
   let dani = 0;
   let debi = 0;
@@ -89,45 +80,87 @@ function computeBalances() {
   };
 }
 
-
-  return { dani, debi, external };
+/* =========================
+   FILTERS
+========================= */
+function setFilter(f) {
+  activeFilter = f;
+  renderTables();
 }
 
-function render() {
-const filteredJobs = state.jobs.filter(j => {
-  if (activeFilter === "ALL") return true;
-  if (activeFilter === "PENDING") return j.Factura !== "Dani" && j.Factura !== "Debi";
-  return j.Factura === activeFilter;
-});
-
-function renderDashboard(rows) {
-  const { dani, debi, external } = computeBalances(rows);
-  const total = dani + debi;
-
-  document.getElementById("daniTotal").textContent = `$${dani.toFixed(2)}`;
-  document.getElementById("debiTotal").textContent = `$${debi.toFixed(2)}`;
-  document.getElementById("externalTotal").textContent = `$${external.toFixed(2)}`;
-  document.getElementById("totalProfit").textContent = `$${total.toFixed(2)}`;
-
-  renderPie(dani, debi, external);
+/* =========================
+   RENDER
+========================= */
+function renderAll() {
+  renderDashboard();
+  renderTables();
 }
 
-function renderPie(dani, debi, external) {
-  const ctx = document.getElementById("profitPie");
+function renderDashboard() {
+  const b = computeBalances();
 
-  if (pieChart) pieChart.destroy();
+  document.getElementById("balance-dani").innerText = format(b.dani);
+  document.getElementById("balance-debi").innerText = format(b.debi);
+  document.getElementById("balance-total").innerText = format(b.totalProfit);
+  document.getElementById("balance-pending").innerText = format(b.pending);
+}
 
-  pieChart = new Chart(ctx, {
-    type: "pie",
-    data: {
-      labels: ["Dani", "Debi", "Pendiente"],
-      datasets: [{
-        data: [dani, debi, external],
-        backgroundColor: ["#4aa3ff", "#ff5fa2", "#8a8f98"]
-      }]
-    }
+function renderTables() {
+  let jobs = [...state.jobs];
+
+  if (activeFilter === "Dani") {
+    jobs = jobs.filter(j => j.Factura === "Dani");
+  } else if (activeFilter === "Debi") {
+    jobs = jobs.filter(j => j.Factura === "Debi");
+  } else if (activeFilter === "PENDING") {
+    jobs = jobs.filter(j => j.Factura !== "Dani" && j.Factura !== "Debi");
+  }
+
+  renderTable("jobs-table", jobs);
+  renderTable("expenses-table", state.expenses);
+}
+
+function renderTable(id, rows) {
+  const table = document.getElementById(id);
+  table.innerHTML = "";
+
+  const thead = document.createElement("thead");
+  thead.innerHTML = `
+    <tr>
+      <th>Concepto</th>
+      <th>Cliente</th>
+      <th class="right">USD</th>
+      <th>Notas</th>
+    </tr>`;
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+
+    if (r.Factura === "Dani") tr.classList.add("row-dani");
+    else if (r.Factura === "Debi") tr.classList.add("row-debi");
+    else tr.classList.add("row-pending");
+
+    tr.innerHTML = `
+      <td>${r.Concepto || ""}</td>
+      <td>${r.Cliente || ""}</td>
+      <td class="right">${format(r.Monto_USD)}</td>
+      <td class="notes">${r.Notas || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+}
+
+/* =========================
+   UTILS
+========================= */
+function format(n) {
+  return Number(n || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
-
-/* INIT MOCK */
-init(window.DATA_FROM_SHEETS || []);
