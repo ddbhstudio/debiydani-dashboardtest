@@ -1,5 +1,6 @@
-const API_URL = "  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+console.log("app.js cargado");
 
+const API_URL = "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec"; // PEGÁ TU URL ACÁ
 
 let state = {
   jobs: [],
@@ -7,22 +8,22 @@ let state = {
   filter: "ALL"
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("INIT OK");
-});
-
-/* AUTH */
-function unlock() {
+/* ========= AUTH ========= */
+window.unlock = function unlock() {
   const pass = document.getElementById("passwordInput").value;
-  if (pass !== "1234") return;
+
+  if (pass !== "1234") {
+    alert("Password incorrecto");
+    return;
+  }
 
   document.getElementById("lockScreen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
 
   loadData();
-}
+};
 
-/* DATA */
+/* ========= DATA ========= */
 async function loadData() {
   const res = await fetch(API_URL);
   const data = await res.json();
@@ -33,9 +34,11 @@ async function loadData() {
   renderAll();
 }
 
-/* CALCS */
+/* ========= CALCS ========= */
 function calcTotals() {
-  let daniIn = 0, debiIn = 0, externalIn = 0;
+  let daniIn = 0;
+  let debiIn = 0;
+  let externalIn = 0;
   let expenses = 0;
 
   state.jobs.forEach(j => {
@@ -44,50 +47,52 @@ function calcTotals() {
     else externalIn += j.USD;
   });
 
-  state.expenses.forEach(e => expenses += e.USD);
+  state.expenses.forEach(e => {
+    expenses += e.USD;
+  });
 
   const totalProfit = daniIn + debiIn - expenses;
   const equilibrium = totalProfit / 2;
 
-  return { daniIn, debiIn, externalIn, totalProfit, equilibrium };
+  return { daniIn, debiIn, externalIn, expenses, totalProfit, equilibrium };
 }
 
-/* RENDER */
-function safeSet(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = val;
-}
-
+/* ========= RENDER ========= */
 function renderAll() {
   const t = calcTotals();
 
-  safeSet("daniTotal", Math.round(t.daniIn));
-  safeSet("debiTotal", Math.round(t.debiIn));
-  safeSet("totalProfit", Math.round(t.totalProfit));
-  safeSet("externalPending", Math.round(t.externalIn));
+  set("daniTotal", t.daniIn);
+  set("debiTotal", t.debiIn);
+  set("totalProfit", t.totalProfit);
+  set("externalPending", t.externalIn);
 
   const gainDani = t.daniIn - t.equilibrium;
   const gainDebi = t.debiIn - t.equilibrium;
 
-  safeSet("gain-dani", Math.round(gainDani));
-  safeSet("gain-debi", Math.round(gainDebi));
+  set("gain-dani", gainDani);
+  set("gain-debi", gainDebi);
 
   let balance = "Equilibrado";
   if (gainDani > gainDebi) balance = `Debi le debe a Dani ${Math.round(gainDani)}`;
   if (gainDebi > gainDani) balance = `Dani le debe a Debi ${Math.round(gainDebi)}`;
 
-  safeSet("balanceText", balance);
+  set("balanceText", balance);
 
   renderJobs();
   renderExpenses();
 }
 
-/* FILTER */
-function setFilter(f) {
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = Math.round(val);
+}
+
+/* ========= FILTER ========= */
+window.setFilter = function (f) {
   state.filter = f;
   updateTabColor();
   renderJobs();
-}
+};
 
 function updateTabColor() {
   const tab = document.getElementById("tab-jobs");
@@ -98,7 +103,7 @@ function updateTabColor() {
   else tab.classList.add("green");
 }
 
-/* TABLES */
+/* ========= TABLES ========= */
 function renderJobs() {
   const tb = document.getElementById("jobsTable");
   tb.innerHTML = "";
@@ -108,8 +113,11 @@ function renderJobs() {
     .forEach(j => {
       const tr = document.createElement("tr");
       tr.className =
-        j.Factura === "Dani" ? "row-dani" :
-        j.Factura === "Debi" ? "row-debi" : "row-external";
+        j.Factura === "Dani"
+          ? "row-dani"
+          : j.Factura === "Debi"
+          ? "row-debi"
+          : "row-external";
 
       tr.innerHTML = `
         <td></td>
@@ -136,16 +144,17 @@ function renderExpenses() {
   });
 }
 
-/* TABS */
-function showSection(sec) {
+/* ========= TABS ========= */
+window.showSection = function (sec) {
   document.getElementById("jobsSection").classList.toggle("hidden", sec !== "jobs");
   document.getElementById("expensesSection").classList.toggle("hidden", sec !== "expenses");
 
   document.getElementById("tab-jobs").classList.toggle("active", sec === "jobs");
   document.getElementById("tab-expenses").classList.toggle("active", sec === "expenses");
-}
+};
 
-/* NEW ENTRY */
-function confirmEntry() {
+/* ========= NEW ENTRY ========= */
+window.confirmEntry = function () {
   alert("✔ Transacción lista para enviar (hook pendiente)");
-}
+};
+
