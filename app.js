@@ -7,12 +7,23 @@ const state = {
   filter: "ALL", // ALL | Dani | Debi | External
 };
 
-/* ================= INIT ================= */
-document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   await Promise.all([loadJobs(), loadExpenses()]);
   renderAll();
+}
+
+/* ================= PASSWORD ================= */
+function unlock() {
+  const pass = document.getElementById("passwordInput").value;
+
+  if (pass === "1234") {
+    document.getElementById("lockScreen").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    init(); // recién acá inicializamos la app
+  } else {
+    alert("Password incorrecto");
+  }
 }
 
 /* ================= FETCH ================= */
@@ -91,6 +102,7 @@ function renderDashboard() {
 /* ================= TABLES ================= */
 function renderJobs() {
   const tbody = document.getElementById("jobsTable");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   state.jobs
@@ -119,6 +131,7 @@ function renderJobs() {
 
 function renderExpenses() {
   const table = document.getElementById("expenses-table");
+  if (!table) return;
   table.innerHTML = "";
 
   table.innerHTML = `
