@@ -1,227 +1,182 @@
-console.log("app.js cargado"); // 👈 debug visual
-
-/* ================= PASSWORD ================= */
-function unlock() {
-  const input = document.getElementById("passwordInput");
-  if (!input) {
-    alert("Error: input no encontrado");
-    return;
-  }
-
-  if (input.value === "1234") {
-    document.getElementById("lockScreen").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    init(); // 👈 recién acá arrancamos todo
-  } else {
-    alert("Password incorrecto");
-  }
-}
-
-/* ================= INIT ================= */
-async function init() {
-  console.log("INIT OK");
-
-  await loadJobs();
-  await loadExpenses();
-  renderAll();
-}
-
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+
+const PASSWORD = "1234";
 
 const state = {
   jobs: [],
   expenses: [],
-  filter: "ALL", // ALL | Dani | Debi | External
+  filter: "ALL",
 };
 
+/* =====================
+   INIT
+===================== */
+document.addEventListener("DOMContentLoaded", init);
 
-/* ================= FETCH ================= */
+async function init() {
+  document.getElementById("unlockBtn").onclick = unlock;
+  console.log("INIT OK");
+}
+
+/* =====================
+   LOCK
+===================== */
+async function unlock() {
+  const val = document.getElementById("passwordInput").value;
+  if (val !== PASSWORD) return alert("Password incorrecto");
+
+  document.getElementById("lockScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+
+  await loadAll();
+  renderAll();
+}
+
+/* =====================
+   FETCH
+===================== */
 async function fetchSheet(type) {
   const res = await fetch(`${API_URL}?type=${type}`);
+  if (!res.ok) throw new Error("Fetch error");
   return res.json();
 }
 
-async function loadJobs() {
+async function loadAll() {
   state.jobs = await fetchSheet("Jobs");
-}
-
-async function loadExpenses() {
   state.expenses = await fetchSheet("Expenses");
 }
 
-/* ================= CALCULATIONS ================= */
-function calculate() {
-  let ingresosDani = 0;
-  let ingresosDebi = 0;
-  let externos = 0;
+/* =====================
+   CALCULATIONS
+===================== */
+function calcTotals() {
+  let daniIn = 0;
+  let debiIn = 0;
+  let externalIn = 0;
+  let expensesTotal = 0;
 
-  state.jobs.forEach((j) => {
-    const monto = Number(j.Monto_USD || 0);
-    if (j.Factura === "Dani") ingresosDani += monto;
-    else if (j.Factura === "Debi") ingresosDebi += monto;
-    else externos += monto;
+  state.jobs.forEach(j => {
+    const v = Number(j.Monto_USD || 0);
+    if (j.Factura === "Dani") daniIn += v;
+    else if (j.Factura === "Debi") debiIn += v;
+    else externalIn += v;
   });
 
-  const gastosTotales = state.expenses.reduce(
-    (sum, e) => sum + Number(e.Monto_USD || 0),
-    0
-  );
+  state.expenses.forEach(e => {
+    expensesTotal += Number(e.Monto_USD || 0);
+  });
 
-  const gastoCompartido = gastosTotales / 2;
-
-  const gananciaDani = ingresosDani - gastoCompartido;
-  const gananciaDebi = ingresosDebi - gastoCompartido;
+  const totalIncome = daniIn + debiIn;
+  const totalProfit = totalIncome - expensesTotal;
+  const equilibrium = totalProfit / 2;
 
   return {
-    ingresosDani,
-    ingresosDebi,
-    externos,
-    gastosTotales,
-    gananciaDani,
-    gananciaDebi,
+    daniIn,
+    debiIn,
+    externalIn,
+    expensesTotal,
+    totalProfit,
+    equilibrium,
   };
 }
 
-/* ================= RENDER DASHBOARD ================= */
-function renderDashboard() {
-  const c = calculate();
+/* =====================
+   RENDER DASHBOARD
+===================== */
+function renderAll() {
+  const t = calcTotals();
 
-  document.getElementById("balance-dani").innerText = format(c.ingresosDani);
-  document.getElementById("balance-debi").innerText = format(c.ingresosDebi);
-  document.getElementById("balance-total").innerText = format(
-    c.ingresosDani + c.ingresosDebi - c.gastosTotales
-  );
+  document.getElementById("daniTotal").innerText =
+    t.daniIn.toLocaleString("en-US");
+  document.getElementById("debiTotal").innerText =
+    t.debiIn.toLocaleString("en-US");
 
-  document.getElementById("gain-dani").innerText = format(c.gananciaDani);
-  document.getElementById("gain-debi").innerText = format(c.gananciaDebi);
-  document.getElementById("balance-pending").innerText = format(c.externos);
+  document.getElementById("gain-dani").innerText =
+    (t.equilibrium - t.debiIn + t.daniIn).toLocaleString("en-US");
 
-  const diff = c.gananciaDani - c.gananciaDebi;
-  const summary = document.getElementById("balance-summary");
+  document.getElementById("gain-debi").innerText =
+    (t.equilibrium - t.daniIn + t.debiIn).toLocaleString("en-US");
 
-  if (Math.abs(diff) < 0.01) {
-    summary.innerText = "Cuentas equilibradas";
-  } else if (diff > 0) {
-    summary.innerText = `Debi le debe a Dani ${format(diff)}`;
-  } else {
-    summary.innerText = `Dani le debe a Debi ${format(-diff)}`;
+  let balanceText = "Cuentas equilibradas";
+  if (t.daniIn > t.equilibrium) {
+    balanceText = `Debi le debe a Dani ${Math.round(
+      t.daniIn - t.equilibrium
+    ).toLocaleString("en-US")}`;
+  } else if (t.debiIn > t.equilibrium) {
+    balanceText = `Dani le debe a Debi ${Math.round(
+      t.debiIn - t.equilibrium
+    ).toLocaleString("en-US")}`;
   }
+
+  document.getElementById("balanceText").innerText = balanceText;
+  document.getElementById("externalPending").innerText =
+    t.externalIn.toLocaleString("en-US");
+
+  renderJobs();
 }
 
-/* ================= TABLES ================= */
+/* =====================
+   FILTER
+===================== */
+function setFilter(val) {
+  state.filter = val;
+  renderJobs();
+}
+
+/* =====================
+   TABLES
+===================== */
 function renderJobs() {
   const tbody = document.getElementById("jobsTable");
-  if (!tbody) return;
   tbody.innerHTML = "";
 
-  state.jobs
-    .filter((j) => {
-      if (state.filter === "ALL") return true;
-      return j.Factura === state.filter;
-    })
-    .forEach((j) => {
-      const tr = document.createElement("tr");
-      tr.className =
-        j.Factura === "Dani"
-          ? "row-dani"
-          : j.Factura === "Debi"
-          ? "row-debi"
-          : "row-external";
+  state.jobs.forEach(j => {
+    if (
+      state.filter !== "ALL" &&
+      j.Factura !== state.filter
+    )
+      return;
 
-      tr.innerHTML = `
-        <td>${j.Concepto}</td>
-        <td class="center">${j.Cliente || ""}</td>
-        <td class="right">${Number(j.Monto_USD).toLocaleString()}</td>
-        <td class="center notes">${j.Notas || ""}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-}
+    const tr = document.createElement("tr");
+    tr.className =
+      j.Factura === "Dani"
+        ? "dani"
+        : j.Factura === "Debi"
+        ? "debi"
+        : "third";
 
-function renderExpenses() {
-  const table = document.getElementById("expenses-table");
-  table.innerHTML = "";
-
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th></th>
-        <th class="right">USD</th>
-        <th class="center">Notas</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${state.expenses
-        .map(
-          (e) => `
-        <tr class="${
-          e.Pagado === "Dani"
-            ? "row-dani"
-            : e.Pagado === "Debi"
-            ? "row-debi"
-            : "row-external"
-        }">
-          <td>${e.Concepto}</td>
-          <td class="right">${Number(e.Monto_USD).toLocaleString()}</td>
-          <td class="center notes">${e.Notas || ""}</td>
-        </tr>`
-        )
-        .join("")}
-    </tbody>
-  `;
-}
-
-/* ================= FILTERS ================= */
-document.getElementById("card-dani").onclick = () => {
-  state.filter = "Dani";
-  renderJobs();
-};
-
-document.getElementById("card-debi").onclick = () => {
-  state.filter = "Debi";
-  renderJobs();
-};
-
-document.getElementById("card-total").onclick = () => {
-  state.filter = "ALL";
-  renderJobs();
-};
-
-document.getElementById("card-pending").onclick = () => {
-  state.filter = "External";
-  renderJobs();
-};
-
-/* ================= TABS ================= */
-function showTab(tab) {
-  document.getElementById("jobs").classList.add("hidden");
-  document.getElementById("expenses").classList.add("hidden");
-
-  document.querySelectorAll(".tabs button").forEach((b) =>
-    b.classList.remove("active")
-  );
-
-  document.getElementById(tab).classList.remove("hidden");
-  event.target.classList.add("active");
-}
-
-/* ================= NEW ENTRY ================= */
-function confirmEntry() {
-  alert("✔ Transacción lista para enviar (hook pendiente)");
-}
-
-/* ================= HELPERS ================= */
-function renderAll() {
-  renderDashboard();
-  renderJobs();
-  renderExpenses();
-}
-
-function format(n) {
-  return Number(n).toLocaleString("en-US", {
-    maximumFractionDigits: 0,
+    tr.innerHTML = `
+      <td>${j.Concepto || ""}</td>
+      <td class="center">${j.Cliente || ""}</td>
+      <td class="right">${Number(j.Monto_USD || 0).toLocaleString("en-US")}</td>
+      <td class="center notes">${j.Notas || ""}</td>
+    `;
+    tbody.appendChild(tr);
   });
 }
 
-document.getElementById("unlockBtn")?.addEventListener("click", unlock);
+/* =====================
+   NEW ENTRY
+===================== */
+async function confirmEntry() {
+  const type = document.getElementById("entryType").value;
+  const payload = {
+    Concepto: document.getElementById("entryConcept").value,
+    Cliente: document.getElementById("entryClient").value,
+    Monto_USD: document.getElementById("entryAmount").value,
+    Factura: document.getElementById("entryWho").value,
+    Notas: document.getElementById("entryNotes").value,
+  };
+
+  if (!confirm("¿Confirmar transacción?")) return;
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ type, payload }),
+  });
+
+  await loadAll();
+  renderAll();
+  alert("Transacción guardada");
+}
