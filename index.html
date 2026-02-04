@@ -18,39 +18,29 @@
 
     <!-- DASHBOARD -->
     <section class="dashboard">
-      <div class="card dani">
+      <div class="card dani" onclick="setFilter('Dani')">
         <h3>Dani</h3>
         <div id="daniTotal">$0</div>
       </div>
 
-      <div class="card debi">
+      <div class="card debi" onclick="setFilter('Debi')">
         <h3>Debi</h3>
         <div id="debiTotal">$0</div>
       </div>
 
-      <div class="card total">
+      <div class="card total" onclick="setFilter('ALL')">
         <h3>Ganancia Total</h3>
         <div id="totalProfit">$0</div>
         <canvas id="profitPie"></canvas>
       </div>
 
-      <div class="card external">
+      <div class="card external" onclick="setFilter('PENDING')">
         <h3>Pendiente en terceros</h3>
         <div id="externalTotal">$0</div>
       </div>
     </section>
 
-    <!-- FILTERS -->
-    <section class="filters">
-      <div id="clientFilters"></div>
-      <div class="partnerFilters">
-        <button data-partner="ALL">Todos</button>
-        <button data-partner="Dani">Dani</button>
-        <button data-partner="Debi">Debi</button>
-        <button data-partner="EXTERNAL">Externos</button>
-      </div>
-    </section>
-
+ 
     <!-- TABLE -->
     <section class="tableWrapper">
       <table>
