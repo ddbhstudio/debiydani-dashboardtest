@@ -189,3 +189,25 @@ function setText(id, value) {
 function format(n) {
   return Math.round(Number(n || 0)).toLocaleString("en-US");
 }
+
+/* LOGIN */
+function unlock() {
+  const pass = document.getElementById("passwordInput").value;
+  if (pass === "1234") {
+    sessionStorage.setItem("auth", "ok");
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("app").classList.remove("hidden");
+  }
+}
+
+if (sessionStorage.getItem("auth") === "ok") {
+  document.getElementById("lockScreen").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
+}
+
+/* TABS */
+function showTab(tab) {
+  document.getElementById("jobs").classList.add("hidden");
+  document.getElementById("expenses").classList.add("hidden");
+  document.getElementById(tab).classList.remove("hidden");
+}
