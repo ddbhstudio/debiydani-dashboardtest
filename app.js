@@ -1,4 +1,5 @@
-const API_URL =  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
+const API_URL =
+  "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
 
 const state = {
   jobs: [],
@@ -10,11 +11,21 @@ let activeFilter = "ALL";
 /* =========================
    INIT
 ========================= */
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("App init");
+  init();
+});
 
 async function init() {
-  await Promise.all([loadJobs(), loadExpenses()]);
-  renderAll();
+  try {
+    await Promise.all([loadJobs(), loadExpenses()]);
+    console.log("Jobs:", state.jobs);
+    console.log("Expenses:", state.expenses);
+    renderAll();
+    bindCardFilters();
+  } catch (e) {
+    console.error("Init error", e);
+  }
 }
 
 /* =========================
@@ -22,7 +33,7 @@ async function init() {
 ========================= */
 async function fetchSheet(type) {
   const res = await fetch(`${API_URL}?type=${type}`);
-  if (!res.ok) throw new Error("Fetch error");
+  if (!res.ok) throw new Error("Fetch error: " + type);
   return res.json();
 }
 
@@ -43,27 +54,25 @@ function computeBalances() {
   let dani = 0;
   let debi = 0;
   let pending = 0;
-  let totalIncome = 0;
-  let totalExpenses = 0;
+  let income = 0;
+  let expenses = 0;
 
-  // INGRESOS
   state.jobs.forEach(j => {
     const amount = Number(j.Monto_USD || 0);
     if (!amount) return;
 
-    totalIncome += amount;
+    income += amount;
 
     if (j.Factura === "Dani") dani += amount;
     else if (j.Factura === "Debi") debi += amount;
     else pending += amount;
   });
 
-  // GASTOS / INVERSION
   state.expenses.forEach(e => {
     const amount = Number(e.Monto_USD || 0);
     if (!amount) return;
 
-    totalExpenses += amount;
+    expenses += amount;
 
     if (e.Pagado === "Dani") dani -= amount;
     else if (e.Pagado === "Debi") debi -= amount;
@@ -74,18 +83,30 @@ function computeBalances() {
     dani,
     debi,
     pending,
-    totalIncome,
-    totalExpenses,
-    totalProfit: totalIncome - totalExpenses
+    total: income - expenses,
   };
 }
 
 /* =========================
    FILTERS
 ========================= */
-function setFilter(f) {
-  activeFilter = f;
-  renderTables();
+function bindCardFilters() {
+  const map = {
+    "card-dani": "Dani",
+    "card-debi": "Debi",
+    "card-total": "ALL",
+    "card-pending": "PENDING",
+  };
+
+  Object.entries(map).forEach(([id, filter]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.cursor = "pointer";
+    el.addEventListener("click", () => {
+      activeFilter = filter;
+      renderTables();
+    });
+  });
 }
 
 /* =========================
@@ -99,22 +120,21 @@ function renderAll() {
 function renderDashboard() {
   const b = computeBalances();
 
-  document.getElementById("balance-dani").innerText = format(b.dani);
-  document.getElementById("balance-debi").innerText = format(b.debi);
-  document.getElementById("balance-total").innerText = format(b.totalProfit);
-  document.getElementById("balance-pending").innerText = format(b.pending);
+  setText("balance-dani", b.dani);
+  setText("balance-debi", b.debi);
+  setText("balance-total", b.total);
+  setText("balance-pending", b.pending);
 }
 
 function renderTables() {
   let jobs = [...state.jobs];
 
-  if (activeFilter === "Dani") {
+  if (activeFilter === "Dani")
     jobs = jobs.filter(j => j.Factura === "Dani");
-  } else if (activeFilter === "Debi") {
+  else if (activeFilter === "Debi")
     jobs = jobs.filter(j => j.Factura === "Debi");
-  } else if (activeFilter === "PENDING") {
+  else if (activeFilter === "PENDING")
     jobs = jobs.filter(j => j.Factura !== "Dani" && j.Factura !== "Debi");
-  }
 
   renderTable("jobs-table", jobs);
   renderTable("expenses-table", state.expenses);
@@ -122,26 +142,27 @@ function renderTables() {
 
 function renderTable(id, rows) {
   const table = document.getElementById(id);
-  table.innerHTML = "";
+  if (!table) return;
 
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr>
-      <th>Concepto</th>
-      <th>Cliente</th>
-      <th class="right">USD</th>
-      <th>Notas</th>
-    </tr>`;
-  table.appendChild(thead);
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Concepto</th>
+        <th>Cliente</th>
+        <th class="right">USD</th>
+        <th>Notas</th>
+      </tr>
+    </thead>
+  `;
 
   const tbody = document.createElement("tbody");
 
   rows.forEach(r => {
     const tr = document.createElement("tr");
 
-    if (r.Factura === "Dani") tr.classList.add("row-dani");
-    else if (r.Factura === "Debi") tr.classList.add("row-debi");
-    else tr.classList.add("row-pending");
+    if (r.Factura === "Dani") tr.className = "row-dani";
+    else if (r.Factura === "Debi") tr.className = "row-debi";
+    else tr.className = "row-pending";
 
     tr.innerHTML = `
       <td>${r.Concepto || ""}</td>
@@ -149,6 +170,7 @@ function renderTable(id, rows) {
       <td class="right">${format(r.Monto_USD)}</td>
       <td class="notes">${r.Notas || ""}</td>
     `;
+
     tbody.appendChild(tr);
   });
 
@@ -163,4 +185,9 @@ function format(n) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = format(value);
 }
