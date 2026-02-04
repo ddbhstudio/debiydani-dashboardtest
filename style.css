@@ -1,37 +1,47 @@
 body {
-  font-family: system-ui, sans-serif;
   margin: 0;
+  font-family: system-ui, sans-serif;
   background: #0f1115;
-  color: #fff;
+  color: #ffffff;
 }
 
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 
 /* LOCK */
 .lock {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 /* TABS */
 .tabs {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   margin: 20px;
 }
 
 .tab {
   cursor: pointer;
-  padding-bottom: 5px;
+  padding-bottom: 6px;
 }
 
-.tab.active.green { border-bottom: 3px solid #4caf50; }
-.tab.active.dani { border-bottom: 3px solid #4fc3f7; }
-.tab.active.debi { border-bottom: 3px solid #f48fb1; }
+.tab.active.green {
+  border-bottom: 3px solid #4caf50;
+}
+
+.tab.active.dani {
+  border-bottom: 3px solid #4fc3f7;
+}
+
+.tab.active.debi {
+  border-bottom: 3px solid #f48fb1;
+}
 
 /* DASHBOARD */
 .dashboard {
@@ -43,13 +53,18 @@ body {
 
 .card {
   background: #1b1f27;
+  border-radius: 14px;
   padding: 16px;
-  border-radius: 12px;
   cursor: pointer;
 }
 
-.card.dani { border: 1px solid #4fc3f7; }
-.card.debi { border: 1px solid #f48fb1; }
+.card.dani {
+  border: 1px solid #4fc3f7;
+}
+
+.card.debi {
+  border: 1px solid #f48fb1;
+}
 
 .big {
   font-size: 28px;
@@ -71,11 +86,15 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 8px;
 }
 
-th.right, td.right { text-align: right; }
+th.right,
+td.right {
+  text-align: right;
+}
 
 .notes,
 th.center {
@@ -83,9 +102,17 @@ th.center {
 }
 
 /* ROW COLORS */
-.row-dani { background: rgba(79, 195, 247, 0.12); }
-.row-debi { background: rgba(244, 143, 177, 0.12); }
-.row-external { background: rgba(255, 255, 255, 0.05); }
+.row-dani {
+  background: rgba(79, 195, 247, 0.15);
+}
+
+.row-debi {
+  background: rgba(244, 143, 177, 0.15);
+}
+
+.row-external {
+  background: rgba(255, 255, 255, 0.06);
+}
 
 /* NEW ENTRY */
 .newEntryWrapper {
@@ -95,11 +122,11 @@ th.center {
 }
 
 .newEntry {
+  background: #1b1f27;
+  padding: 20px;
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #1b1f27;
-  padding: 20px;
-  border-radius: 12px;
-  width: 300px;
+  width: 320px;
 }
