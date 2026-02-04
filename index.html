@@ -18,43 +18,43 @@
 
     <!-- DASHBOARD -->
     <section class="dashboard">
-      <div class="card dani" onclick="setFilter('Dani')">
-        <h3>Dani</h3>
-        <div id="daniTotal">$0</div>
-      </div>
+      
+      <div class="card dani" id="card-dani">
+  <h3>Dani</h3>
+  <div class="amount" id="balance-dani">$0.00</div>
+</div>
 
-      <div class="card debi" onclick="setFilter('Debi')">
-        <h3>Debi</h3>
-        <div id="debiTotal">$0</div>
-      </div>
 
-      <div class="card total" onclick="setFilter('ALL')">
-        <h3>Ganancia Total</h3>
-        <div id="totalProfit">$0</div>
-        <canvas id="profitPie"></canvas>
-      </div>
+   <div class="card debi" id="card-debi">
+  <h3>Debi</h3>
+  <div class="amount" id="balance-debi">$0.00</div>
+</div>
 
-      <div class="card external" onclick="setFilter('PENDING')">
-        <h3>Pendiente en terceros</h3>
-        <div id="externalTotal">$0</div>
-      </div>
+
+     <div class="card total" id="card-total">
+  <h3>Ganancia Total</h3>
+  <div class="amount" id="balance-total">$0.00</div>
+       <canvas id="profitPie"></canvas>
+</div>
+
+ <div class="card pending" id="card-pending">
+  <h3>Pendiente en terceros</h3>
+  <div class="amount" id="balance-pending">$0.00</div>
+</div>
+
     </section>
 
  
     <!-- TABLE -->
     <section class="tableWrapper">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Cliente</th>
-            <th class="right">USD</th>
-            <th>Notas</th>
-          </tr>
-        </thead>
-        <tbody id="jobsTable"></tbody>
-      </table>
-    </section>
+  <table id="jobs-table">
+    <!-- JS genera thead + tbody -->
+  </table>
+</section>
+    
+  <section class="tableWrapper">
+  <table id="expenses-table"></table>
+</section>
 
   </div>
 
