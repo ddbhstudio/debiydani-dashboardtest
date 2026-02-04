@@ -10,16 +10,18 @@
 </head>
 <body>
 
-  <div id="lockScreen">
+    <!-- LOCK -->
+  <div id="lockScreen" class="lock">
+    <h2>Acceso privado</h2>
     <input type="password" id="passwordInput" placeholder="Password" />
-    <button onclick="unlock()">Entrar</button>
+    <button id="unlockBtn">Entrar</button>
   </div>
 
+  <!-- APP -->
   <div id="app" class="hidden">
-  
   <h1>Nuestro Súper Dashboard y Balance</h1>
 
-<!-- DASHBOARD -->
+  <!-- DASHBOARD -->
   <section class="dashboard">
     <div class="card dani" id="card-dani">
       <h3>Dani</h3>
@@ -83,6 +85,7 @@
 
 </div>
 
+  <!-- JS SIEMPRE AL FINAL -->
   <script src="app.js"></script>
 </body>
 </html>
