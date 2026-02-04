@@ -1,49 +1,19 @@
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
   background: #0f1115;
-  color: #ffffff;
+  color: #fff;
+  font-family: system-ui, sans-serif;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
-/* LOCK */
 .lock {
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px;
 }
 
-/* TABS */
-.tabs {
-  display: flex;
-  gap: 24px;
-  margin: 20px;
-}
-
-.tab {
-  cursor: pointer;
-  padding-bottom: 6px;
-}
-
-.tab.active.green {
-  border-bottom: 3px solid #4caf50;
-}
-
-.tab.active.dani {
-  border-bottom: 3px solid #4fc3f7;
-}
-
-.tab.active.debi {
-  border-bottom: 3px solid #f48fb1;
-}
-
-/* DASHBOARD */
 .dashboard {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -53,80 +23,43 @@ body {
 
 .card {
   background: #1b1f27;
-  border-radius: 14px;
   padding: 16px;
-  cursor: pointer;
+  border-radius: 12px;
 }
 
-.card.dani {
-  border: 1px solid #4fc3f7;
-}
+.card.dani { border: 1px solid #4fc3f7; }
+.card.debi { border: 1px solid #f48fb1; }
 
-.card.debi {
-  border: 1px solid #f48fb1;
-}
-
-.big {
-  font-size: 28px;
-  margin-top: 8px;
-}
-
-.sub {
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-/* TABLES */
-.tableWrapper {
+.tabs {
   margin: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.tabs span {
+  cursor: pointer;
+  padding-bottom: 4px;
+}
+
+.tabs .active {
+  border-bottom: 2px solid #4caf50;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  margin: 20px;
 }
 
-th,
-td {
+th, td {
   padding: 8px;
 }
 
-th.right,
-td.right {
-  text-align: right;
-}
+.notes, th.center{ text-align: center; }
 
-.notes,
-th.center {
-  text-align: center;
-}
+.right { text-align: right; }
+.center { text-align: center; }
 
-/* ROW COLORS */
-.row-dani {
-  background: rgba(79, 195, 247, 0.15);
-}
-
-.row-debi {
-  background: rgba(244, 143, 177, 0.15);
-}
-
-.row-external {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-/* NEW ENTRY */
-.newEntryWrapper {
-  display: flex;
-  justify-content: center;
-  margin: 40px 0;
-}
-
-.newEntry {
-  background: #1b1f27;
-  padding: 20px;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 320px;
-}
+.row-dani { background: rgba(79,195,247,0.15); }
+.row-debi { background: rgba(244,143,177,0.15); }
+.row-external { background: rgba(255,255,255,0.05); }
