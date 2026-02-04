@@ -137,7 +137,7 @@ function renderJobs() {
           </tr>
         </thead>
         
-        `;
+  
   <tbody>
     
     ${state.jobs
@@ -165,7 +165,8 @@ function renderJobs() {
       table1.appendChild(tr);
     });
 
- </tbody>`;
+ </tbody>
+  `;
 }
 
 function renderExpenses() {
