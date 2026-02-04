@@ -1,3 +1,16 @@
+/* ================= PASSWORD ================= */
+function unlock() {
+  const pass = document.getElementById("passwordInput").value;
+
+  if (pass === "1234") {
+    document.getElementById("lockScreen").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    init(); // recién acá inicializamos la app
+  } else {
+    alert("Password incorrecto");
+  }
+}
+
 const API_URL =
   "https://script.google.com/macros/s/AKfycbwVVuurS_zh9eIwzxLwfzuyT-8u5rkbS5CYDhEOCmEM8ZnLlUHj67icH6IpOg9_vW_I/exec";
 
