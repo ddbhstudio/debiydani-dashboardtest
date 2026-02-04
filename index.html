@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<!-- LOCK -->
+<!-- LOCK SCREEN -->
 <div id="lockScreen" class="lock">
   <h2>Acceso privado</h2>
   <input type="password" id="passwordInput" placeholder="Password" />
@@ -21,7 +21,7 @@
 
   <!-- TABS -->
   <nav class="tabs">
-    <span id="tab-jobs" class="tab active" onclick="showSection('jobs')">Trabajos</span>
+    <span id="tab-jobs" class="tab active green" onclick="showSection('jobs')">Trabajos</span>
     <span id="tab-expenses" class="tab" onclick="showSection('expenses')">Gastos / Inversión</span>
   </nav>
 
@@ -31,13 +31,17 @@
     <div class="card dani" onclick="setFilter('Dani')">
       <h3>Dani</h3>
       <div class="big" id="daniTotal">0</div>
-      <div class="sub">Ganancia Dani: <span id="gain-dani">0</span></div>
+      <div class="sub">
+        Ganancia Dani: <span id="gain-dani">0</span>
+      </div>
     </div>
 
     <div class="card debi" onclick="setFilter('Debi')">
       <h3>Debi</h3>
       <div class="big" id="debiTotal">0</div>
-      <div class="sub">Ganancia Debi: <span id="gain-debi">0</span></div>
+      <div class="sub">
+        Ganancia Debi: <span id="gain-debi">0</span>
+      </div>
     </div>
 
     <div class="card total" onclick="setFilter('ALL')">
@@ -48,7 +52,9 @@
     <div class="card balance">
       <h3>Balance</h3>
       <div class="big" id="balanceText">–</div>
-      <div class="sub">Pendiente terceros: <span id="externalPending">0</span></div>
+      <div class="sub">
+        Pendiente terceros: <span id="externalPending">0</span>
+      </div>
     </div>
 
   </section>
@@ -86,16 +92,17 @@
   <section class="newEntryWrapper">
     <div class="newEntry">
       <h3>Nueva transacción</h3>
-      <input placeholder="Tipo (Job / Expense)" />
-      <input placeholder="Factura (Dani / Debi / Externo)" />
-      <input placeholder="USD" />
-      <input placeholder="Notas" />
+      <input id="entryType" placeholder="Job / Expense" />
+      <input id="entryFactura" placeholder="Dani / Debi / Externo" />
+      <input id="entryUSD" placeholder="USD" />
+      <input id="entryNotas" placeholder="Notas" />
       <button onclick="confirmEntry()">Confirmar</button>
     </div>
   </section>
 
 </div>
 
+<!-- IMPORTANTE: JS AL FINAL -->
 <script src="app.js"></script>
 </body>
 </html>
