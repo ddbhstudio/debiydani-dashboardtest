@@ -7,15 +7,12 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<!-- LOGIN -->
-<div id="lockScreen">
-  <div class="lockBox">
+  <!-- LOCK -->
+  <div id="lockScreen" class="lock">
     <h2>Acceso privado</h2>
     <input type="password" id="passwordInput" placeholder="Password" />
-    <button onclick="unlock()">Ingresar</button>
+    <button id="unlockBtn">Entrar</button>
   </div>
-</div>
 
 <!-- APP -->
 <div id="app" class="hidden">
@@ -84,6 +81,6 @@
 
 </div>
 
-<script src="app.js"></script>
+ <script src="app.js"></script>
 </body>
 </html>
