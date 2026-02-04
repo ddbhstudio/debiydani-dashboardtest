@@ -113,9 +113,9 @@ function renderDashboard() {
     const ajuste = Math.abs(diff) / 2;
   
     if (diff > 0) {
-      summary.innerText = `Debi le debe a Dani ${format(ajuste)}`;
-    } else {
       summary.innerText = `Dani le debe a Debi ${format(ajuste)}`;
+    } else {
+      summary.innerText = `Debi le debe a Dani ${format(ajuste)}`;
     }
   }
 
@@ -189,21 +189,25 @@ function renderExpenses() {
 document.getElementById("card-dani").onclick = () => {
   state.filter = "Dani";
   renderJobs();
+  renderExpenses();
 };
 
 document.getElementById("card-debi").onclick = () => {
   state.filter = "Debi";
   renderJobs();
+  renderExpenses();
 };
 
 document.getElementById("card-total").onclick = () => {
   state.filter = "ALL";
   renderJobs();
+  renderExpenses();
 };
 
 document.getElementById("card-pending").onclick = () => {
   state.filter = "External";
   renderJobs();
+  renderExpenses();
 };
 
 /* ================= TABS ================= */
