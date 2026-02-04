@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Debi & Dani Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Debi & Dani</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
+<!-- PASSWORD -->
 <div id="lockScreen" class="lock">
   <h2>Acceso privado</h2>
-  <input type="password" id="passwordInput" placeholder="Password" />
+  <input type="password" id="passwordInput" placeholder="Password">
   <button onclick="unlock()">Ingresar</button>
 </div>
 
@@ -19,48 +19,40 @@
 
   <h1>Nuestro Súper Dashboard y Balance</h1>
 
-  <!-- TABS -->
-  <nav class="tabs">
-    <span id="tab-jobs" class="tab active green" onclick="showSection('jobs')">Trabajos</span>
-    <span id="tab-expenses" class="tab" onclick="showSection('expenses')">Gastos / Inversión</span>
-  </nav>
-
   <!-- DASHBOARD -->
   <section class="dashboard">
-
-    <div class="card dani" onclick="setFilter('Dani')">
+    <div class="card dani">
       <h3>Dani</h3>
-      <div class="big" id="daniTotal">0</div>
-      <div class="sub">
-        Ganancia Dani: <span id="gain-dani">0</span>
-      </div>
+      <div id="daniTotal">0</div>
+      <small>Ganancia Dani: <span id="gain-dani">0</span></small>
     </div>
 
-    <div class="card debi" onclick="setFilter('Debi')">
+    <div class="card debi">
       <h3>Debi</h3>
-      <div class="big" id="debiTotal">0</div>
-      <div class="sub">
-        Ganancia Debi: <span id="gain-debi">0</span>
-      </div>
+      <div id="debiTotal">0</div>
+      <small>Ganancia Debi: <span id="gain-debi">0</span></small>
     </div>
 
-    <div class="card total" onclick="setFilter('ALL')">
-      <h3>Ganancia Total</h3>
-      <div class="big" id="totalProfit">0</div>
+    <div class="card total">
+      <h3>Ganancia total</h3>
+      <div id="totalProfit">0</div>
     </div>
 
     <div class="card balance">
       <h3>Balance</h3>
-      <div class="big" id="balanceText">–</div>
-      <div class="sub">
-        Pendiente terceros: <span id="externalPending">0</span>
-      </div>
+      <div id="balanceText">–</div>
+      <small>Pendiente terceros: <span id="externalPending">0</span></small>
     </div>
-
   </section>
 
+  <!-- TABS -->
+  <nav class="tabs">
+    <span class="active" onclick="showSection('jobs')">Trabajos</span>
+    <span onclick="showSection('expenses')">Gastos / Inversión</span>
+  </nav>
+
   <!-- JOBS -->
-  <section id="jobsSection" class="tableWrapper">
+  <section id="jobsSection">
     <table>
       <thead>
         <tr>
@@ -75,7 +67,7 @@
   </section>
 
   <!-- EXPENSES -->
-  <section id="expensesSection" class="tableWrapper hidden">
+  <section id="expensesSection" class="hidden">
     <table>
       <thead>
         <tr>
@@ -88,21 +80,8 @@
     </table>
   </section>
 
-  <!-- NEW ENTRY -->
-  <section class="newEntryWrapper">
-    <div class="newEntry">
-      <h3>Nueva transacción</h3>
-      <input id="entryType" placeholder="Job / Expense" />
-      <input id="entryFactura" placeholder="Dani / Debi / Externo" />
-      <input id="entryUSD" placeholder="USD" />
-      <input id="entryNotas" placeholder="Notas" />
-      <button onclick="confirmEntry()">Confirmar</button>
-    </div>
-  </section>
-
 </div>
 
-<!-- IMPORTANTE: JS AL FINAL -->
 <script src="app.js"></script>
 </body>
 </html>
