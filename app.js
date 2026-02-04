@@ -127,7 +127,7 @@ function renderJobs() {
   const table1 = document.getElementById("jobsTable");
   if (!table1) return; // 🔒 evita el error que estás viendo
   table1.innerHTML = "";
-      table1.innerHTML = `
+  table1.innerHTML = `
         <thead>
           <tr>
             <th></th>
@@ -145,7 +145,7 @@ function renderJobs() {
       if (state.filter === "ALL") return true;
       return j.Factura === state.filter;
     })
-    .forEach((j) => {
+    ${.forEach((j) => {
       const tr = document.createElement("tr");
       tr.className =
         j.Factura === "Dani"
@@ -163,9 +163,10 @@ function renderJobs() {
        };
       
       table1.appendChild(tr);
-    });
-
- </tbody>
+    </tr>`
+        )
+        .join("")}
+    </tbody>
   `;
 }
 
