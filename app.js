@@ -123,6 +123,19 @@ function renderDashboard() {
 
 /* ================= TABLES ================= */
 function renderJobs() {
+   const table = document.getElementById("jobsTable");
+      if (!table) return;
+      table.innerHTML = "";
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th></th>
+            <th class="center">Cliente</th>
+            <th class="right">USD</th>
+            <th class="center">Notas</th>
+          </tr>
+        </thead>`;
+  
   const tbody = document.getElementById("jobsTable");
   if (!tbody) return; // 🔒 evita el error que estás viendo
   tbody.innerHTML = "";
