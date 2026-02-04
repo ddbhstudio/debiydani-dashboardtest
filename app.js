@@ -123,9 +123,10 @@ function renderDashboard() {
 
 /* ================= TABLES ================= */
 function renderJobs() {
-   const table = document.getElementById("jobsTable");
-      if (!table) return;
-      table.innerHTML = "";
+  
+  const table = document.getElementById("jobsTable");
+  if (!table) return; // 🔒 evita el error que estás viendo
+  table.innerHTML = "";
       table.innerHTML = `
         <thead>
           <tr>
@@ -134,13 +135,12 @@ function renderJobs() {
             <th class="right">USD</th>
             <th class="center">Notas</th>
           </tr>
-        </thead>`;
-  
-  const tbody = document.getElementById("jobsTable");
-  if (!tbody) return; // 🔒 evita el error que estás viendo
-  tbody.innerHTML = "";
-
-  state.jobs
+        </thead>
+        
+        `;
+  <tbody>
+    
+    ${state.jobs
     .filter((j) => {
       if (state.filter === "ALL") return true;
       return j.Factura === state.filter;
@@ -160,8 +160,12 @@ function renderJobs() {
         <td class="right">${Number(j.Monto_USD).toLocaleString()}</td>
         <td class="center notes">${j.Notas || ""}</td>
       `;
-      tbody.appendChild(tr);
+       };
+      
+      table.appendChild(tr);
     });
+
+ </tbody>`;
 }
 
 function renderExpenses() {
