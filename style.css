@@ -248,3 +248,5 @@ tbody tr.third {
   font-weight: 600;
   cursor: pointer;
 }
+
+.notes, th.center{ text-align: center; }
