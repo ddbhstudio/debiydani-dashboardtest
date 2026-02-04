@@ -123,30 +123,33 @@ function renderDashboard() {
 
 /* ================= TABLES ================= */
 function renderJobs() {
-  
-  const table1 = document.getElementById("jobsTable");
-  if (!table1) return; // 🔒 evita el error que estás viendo
-  table1.innerHTML = "";
-  table1.innerHTML = `
-        <thead>
-          <tr>
-            <th></th>
-            <th class="center">Cliente</th>
-            <th class="right">USD</th>
-            <th class="center">Notas</th>
-          </tr>
-        </thead>
-        
-  
-  <tbody>
-    
-    ${state.jobs
+  const table = document.getElementById("jobsTable");
+  if (!table) return;
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th></th>
+        <th class="center">Cliente</th>
+        <th class="right">USD</th>
+        <th class="center">Notas</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  state.jobs
     .filter((j) => {
       if (state.filter === "ALL") return true;
+      if (state.filter === "External")
+        return j.Factura !== "Dani" && j.Factura !== "Debi";
       return j.Factura === state.filter;
     })
-    ${.forEach((j) => {
+    .forEach((j) => {
       const tr = document.createElement("tr");
+
       tr.className =
         j.Factura === "Dani"
           ? "row-dani"
@@ -155,25 +158,20 @@ function renderJobs() {
           : "row-external";
 
       tr.innerHTML = `
-        <td>${j.Concepto}</td>
+        <td>${j.Concepto || ""}</td>
         <td class="center">${j.Cliente || ""}</td>
-        <td class="right">${Number(j.Monto_USD).toLocaleString()}</td>
+        <td class="right">${Number(j.Monto_USD || 0).toLocaleString()}</td>
         <td class="center notes">${j.Notas || ""}</td>
       `;
-       };
-      
-      table1.appendChild(tr);
-    </tr>`
-        )
-        .join("")}
-    </tbody>
-  `;
+
+      tbody.appendChild(tr);
+    });
 }
+
 
 function renderExpenses() {
   const table = document.getElementById("expenses-table");
   if (!table) return;
-  table.innerHTML = "";
 
   table.innerHTML = `
     <thead>
@@ -183,26 +181,38 @@ function renderExpenses() {
         <th class="center">Notas</th>
       </tr>
     </thead>
-    <tbody>
-      ${state.expenses
-        .map(
-          (e) => `
-        <tr class="${
-          e.Pagado === "Dani"
-            ? "row-dani"
-            : e.Pagado === "Debi"
-            ? "row-debi"
-            : "row-external"
-        }">
-          <td>${e.Concepto}</td>
-          <td class="right">${Number(e.Monto_USD).toLocaleString()}</td>
-          <td class="center notes">${e.Notas || ""}</td>
-        </tr>`
-        )
-        .join("")}
-    </tbody>
+    <tbody></tbody>
   `;
+
+  const tbody = table.querySelector("tbody");
+
+  state.expenses
+    .filter((e) => {
+      if (state.filter === "ALL") return true;
+      if (state.filter === "External")
+        return e.Pagado !== "Dani" && e.Pagado !== "Debi";
+      return e.Pagado === state.filter;
+    })
+    .forEach((e) => {
+      const tr = document.createElement("tr");
+
+      tr.className =
+        e.Pagado === "Dani"
+          ? "row-dani"
+          : e.Pagado === "Debi"
+          ? "row-debi"
+          : "row-external";
+
+      tr.innerHTML = `
+        <td>${e.Concepto || ""}</td>
+        <td class="right">${Number(e.Monto_USD || 0).toLocaleString()}</td>
+        <td class="center notes">${e.Notas || ""}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
 }
+
 
 /* ================= FILTERS ================= */
 document.getElementById("card-dani").onclick = () => {
