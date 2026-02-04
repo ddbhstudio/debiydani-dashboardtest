@@ -3,85 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <title>Debi & Dani</title>
-  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css" />
+
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
 
-<!-- PASSWORD -->
-<div id="lockScreen" class="lock">
-  <h2>Acceso privado</h2>
-  <input type="password" id="passwordInput" placeholder="Password">
-  <button onclick="unlock()">Ingresar</button>
-</div>
+  <div id="lockScreen">
+    <input type="password" id="passwordInput" placeholder="Password" />
+    <button onclick="unlock()">Entrar</button>
+  </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
-
+  <div id="app" class="hidden">
+  
   <h1>Nuestro Súper Dashboard y Balance</h1>
 
-  <!-- DASHBOARD -->
+<!-- DASHBOARD -->
   <section class="dashboard">
-    <div class="card dani">
+    <div class="card dani" id="card-dani">
       <h3>Dani</h3>
-      <div id="daniTotal">0</div>
-      <small>Ganancia Dani: <span id="gain-dani">0</span></small>
+      <div class="amount" id="balance-dani">0</div>
+      <div class="sub">Ganancia Dani: <span id="gain-dani">0</span></div>
     </div>
 
-    <div class="card debi">
+    <div class="card debi" id="card-debi">
       <h3>Debi</h3>
-      <div id="debiTotal">0</div>
-      <small>Ganancia Debi: <span id="gain-debi">0</span></small>
+      <div class="amount" id="balance-debi">0</div>
+      <div class="sub">Ganancia Debi: <span id="gain-debi">0</span></div>
     </div>
 
-    <div class="card total">
-      <h3>Ganancia total</h3>
-      <div id="totalProfit">0</div>
+    <div class="card total" id="card-total">
+      <h3>Ganancia Total</h3>
+      <div class="amount" id="balance-total">0</div>
     </div>
 
-    <div class="card balance">
+    <div class="card pending" id="card-pending">
       <h3>Balance</h3>
-      <div id="balanceText">–</div>
-      <small>Pendiente terceros: <span id="externalPending">0</span></small>
+      <div class="amount" id="balance-summary"></div>
+      <div class="sub">Pendiente terceros: <span id="balance-pending">0</span></div>
     </div>
   </section>
 
   <!-- TABS -->
   <nav class="tabs">
-    <span class="active" onclick="showSection('jobs')">Trabajos</span>
-    <span onclick="showSection('expenses')">Gastos / Inversión</span>
+    <button class="active" onclick="showTab('jobs')">Trabajos</button>
+    <button onclick="showTab('expenses')">Gastos / Inversión</button>
   </nav>
 
-  <!-- JOBS -->
-  <section id="jobsSection">
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th class="center">Cliente</th>
-          <th class="right">USD</th>
-          <th class="center">Notas</th>
-        </tr>
-      </thead>
-      <tbody id="jobsTable"></tbody>
-    </table>
+  <!-- TABLES -->
+  <section id="jobs" class="tableWrapper">
+    <table id="jobs-table"></table>
   </section>
 
-  <!-- EXPENSES -->
-  <section id="expensesSection" class="hidden">
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th class="right">USD</th>
-          <th class="center">Notas</th>
-        </tr>
-      </thead>
-      <tbody id="expensesTable"></tbody>
-    </table>
+  <section id="expenses" class="tableWrapper hidden">
+    <table id="expenses-table"></table>
+  </section>
+
+  <!-- NEW ENTRY -->
+  <section class="newEntry">
+    <h3>Nueva transacción</h3>
+
+    <select id="entryType">
+      <option value="Jobs">Trabajo (Ingreso)</option>
+      <option value="Expenses">Gasto / Inversión</option>
+    </select>
+
+    <input id="concepto" placeholder="Concepto" />
+    <input id="cliente" placeholder="Cliente (solo trabajos)" />
+    <input id="monto" type="number" placeholder="USD" />
+    <select id="persona">
+      <option>Dani</option>
+      <option>Debi</option>
+    </select>
+    <input id="notas" placeholder="Notas" />
+
+    <button onclick="confirmEntry()">Confirmar</button>
   </section>
 
 </div>
 
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
