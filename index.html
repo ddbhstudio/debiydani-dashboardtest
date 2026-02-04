@@ -2,62 +2,88 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Vault Vista – Finanzas</title>
-
+  <title>Debi & Dani · Dashboard</title>
+  <meta name="robots" content="noindex,nofollow" />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-  <div class="container">
 
-    <!-- DASHBOARD -->
-    <section class="dashboard">
-      
-      <div class="card dani" id="card-dani">
-  <h3>Dani</h3>
-  <div class="amount" id="balance-dani">$0.00</div>
-</div>
-
-
-   <div class="card debi" id="card-debi">
-  <h3>Debi</h3>
-  <div class="amount" id="balance-debi">$0.00</div>
-</div>
-
-
-     <div class="card total" id="card-total">
-  <h3>Ganancia Total</h3>
-  <div class="amount" id="balance-total">$0.00</div>
-       <canvas id="profitPie"></canvas>
-</div>
-
- <div class="card pending" id="card-pending">
-  <h3>Pendiente en terceros</h3>
-  <div class="amount" id="balance-pending">$0.00</div>
-</div>
-
-    </section>
-
- 
-    <!-- TABLE -->
-    <section class="tableWrapper">
-  <table id="jobs-table">
-    <!-- JS genera thead + tbody -->
-  </table>
-</section>
-    
-  <section class="tableWrapper">
-  <table id="expenses-table"></table>
-</section>
-
+<!-- LOGIN -->
+<div id="lockScreen">
+  <div class="lockBox">
+    <h2>Acceso privado</h2>
+    <input type="password" id="passwordInput" placeholder="Password" />
+    <button onclick="unlock()">Ingresar</button>
   </div>
+</div>
 
-  <script src="app.js"></script>
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <!-- DASHBOARD -->
+  <section class="dashboard">
+    <div class="card dani" id="card-dani">
+      <h3>Dani</h3>
+      <div class="amount" id="balance-dani">0</div>
+      <div class="sub">Ganancia Dani: <span id="gain-dani">0</span></div>
+    </div>
+
+    <div class="card debi" id="card-debi">
+      <h3>Debi</h3>
+      <div class="amount" id="balance-debi">0</div>
+      <div class="sub">Ganancia Debi: <span id="gain-debi">0</span></div>
+    </div>
+
+    <div class="card total" id="card-total">
+      <h3>Ganancia Total</h3>
+      <div class="amount" id="balance-total">0</div>
+    </div>
+
+    <div class="card pending" id="card-pending">
+      <h3>Balance</h3>
+      <div class="amount" id="balance-summary"></div>
+      <div class="sub">Pendiente terceros: <span id="balance-pending">0</span></div>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <nav class="tabs">
+    <button class="active" onclick="showTab('jobs')">Trabajos</button>
+    <button onclick="showTab('expenses')">Gastos / Inversión</button>
+  </nav>
+
+  <!-- TABLES -->
+  <section id="jobs" class="tableWrapper">
+    <table id="jobs-table"></table>
+  </section>
+
+  <section id="expenses" class="tableWrapper hidden">
+    <table id="expenses-table"></table>
+  </section>
+
+  <!-- NEW ENTRY -->
+  <section class="newEntry">
+    <h3>Nueva transacción</h3>
+
+    <select id="entryType">
+      <option value="Jobs">Trabajo (Ingreso)</option>
+      <option value="Expenses">Gasto / Inversión</option>
+    </select>
+
+    <input id="concepto" placeholder="Concepto" />
+    <input id="cliente" placeholder="Cliente (solo trabajos)" />
+    <input id="monto" type="number" placeholder="USD" />
+    <select id="persona">
+      <option>Dani</option>
+      <option>Debi</option>
+    </select>
+    <input id="notas" placeholder="Notas" />
+
+    <button onclick="confirmEntry()">Confirmar</button>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
