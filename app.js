@@ -48,67 +48,57 @@ function setActive(container, btn) {
   btn.classList.add("active");
 }
 
-function computeBalances(rows) {
-  let dani = 0, debi = 0, external = 0;
+function computeBalances() {
+  let dani = 0;
+  let debi = 0;
+  let pending = 0;
+  let totalIncome = 0;
+  let totalExpenses = 0;
 
-  rows.forEach(r => {
-    const amount = Number(r.USD);
-    if (!PARTNERS.includes(r.Pagado)) {
-      external += amount;
-      return;
-    }
+  // INGRESOS
+  state.jobs.forEach(j => {
+    const amount = Number(j.Monto_USD || 0);
+    if (!amount) return;
 
-    if (r.Pagado === "Dani") {
-      dani += amount / 2;
-      debi -= amount / 2;
-    } else {
-      debi += amount / 2;
-      dani -= amount / 2;
-    }
+    totalIncome += amount;
+
+    if (j.Factura === "Dani") dani += amount;
+    else if (j.Factura === "Debi") debi += amount;
+    else pending += amount;
   });
+
+  // GASTOS / INVERSION
+  state.expenses.forEach(e => {
+    const amount = Number(e.Monto_USD || 0);
+    if (!amount) return;
+
+    totalExpenses += amount;
+
+    if (e.Pagado === "Dani") dani -= amount;
+    else if (e.Pagado === "Debi") debi -= amount;
+    else pending -= amount;
+  });
+
+  return {
+    dani,
+    debi,
+    pending,
+    totalIncome,
+    totalExpenses,
+    totalProfit: totalIncome - totalExpenses
+  };
+}
+
 
   return { dani, debi, external };
 }
 
 function render() {
-  let rows = [...state.jobs];
-
-  if (state.filters.client !== "ALL") {
-    rows = rows.filter(r => r.Cliente === state.filters.client);
-  }
-
-  if (state.filters.partner !== "ALL") {
-    if (state.filters.partner === "EXTERNAL") {
-      rows = rows.filter(r => !PARTNERS.includes(r.Pagado));
-    } else {
-      rows = rows.filter(r => r.Pagado === state.filters.partner);
-    }
-  }
-
-  renderTable(rows);
-  renderDashboard(rows);
-}
-
-function renderTable(rows) {
-  const tbody = document.getElementById("jobsTable");
-  tbody.innerHTML = "";
-
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-
-    if (r.Pagado === "Dani") tr.className = "dani";
-    else if (r.Pagado === "Debi") tr.className = "debi";
-    else tr.className = "external";
-
-    tr.innerHTML = `
-      <td>${r.Concepto}</td>
-      <td>${r.Cliente}</td>
-      <td class="right">${Number(r.USD).toLocaleString()}</td>
-      <td class="notes">${r.Notas || ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+const filteredJobs = state.jobs.filter(j => {
+  if (activeFilter === "ALL") return true;
+  if (activeFilter === "PENDING") return j.Factura !== "Dani" && j.Factura !== "Debi";
+  return j.Factura === activeFilter;
+});
 
 function renderDashboard(rows) {
   const { dani, debi, external } = computeBalances(rows);
