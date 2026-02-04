@@ -1,7 +1,6 @@
 console.log("app.js cargado"); // 👈 debug visual
 
-let pieChart;
-let monthlyChart;
+let monthlyChart = null;
 let monthsFilter = 6;
 
 
@@ -23,42 +22,36 @@ function unlock() {
 }
 
 /* ================= GRAPHS ================= */
-function renderPieChart(c) {
-  const ctx = document.getElementById("pieChart");
-  if (!ctx) return;
+function getMonthlyData(filter = "all") {
+  const map = {};
 
-  const data = [
-    c.gananciaDani,
-    c.gananciaDebi,
-    c.externos || 0,
-  ];
+  state.jobs.forEach(j => {
+    const who = j.Factura;
+    if (filter === "dani" && who !== "Dani") return;
+    if (filter === "debi" && who !== "Debi") return;
+    if (who !== "Dani" && who !== "Debi") return;
 
-  if (pieChart) pieChart.destroy();
+    const date = new Date(j.Fecha);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
-  pieChart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Dani", "Debi", "Externos"],
-      datasets: [
-        {
-          data,
-          backgroundColor: [
-            "rgba(120,200,255,0.8)", // Dani
-            "rgba(255,140,200,0.8)", // Debi
-            "rgba(200,200,200,0.7)", // Externos
-          ],
-          borderWidth: 0,
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: { position: "bottom" },
-      },
-      cutout: "65%",
-    },
+    if (!map[key]) {
+      map[key] = { dani: 0, debi: 0 };
+    }
+
+    const amount = Number(j.Monto_USD) || 0;
+    if (who === "Dani") map[key].dani += amount;
+    if (who === "Debi") map[key].debi += amount;
   });
+
+  const labels = Object.keys(map).sort();
+  const dani = labels.map(m => map[m].dani);
+  const debi = labels.map(m => map[m].debi);
+  const total = labels.map((_, i) => dani[i] + debi[i]);
+
+  return { labels, dani, debi, total };
 }
+
+
 
 function groupJobsByMonth() {
   const now = new Date();
@@ -96,55 +89,68 @@ function groupJobsByMonth() {
     }));
 }
 
-function renderMonthlyChart() {
+function renderMonthlyChart(filter = "all") {
   const ctx = document.getElementById("monthlyChart");
   if (!ctx) return;
 
-  const data = groupJobsByMonth();
+  const data = getMonthlyData(filter);
 
-  const labels = data.map((d) => d.month);
-  const dani = data.map((d) => d.dani);
-  const debi = data.map((d) => d.debi);
-  const total = data.map((d) => d.total);
-
-  if (monthlyChart) monthlyChart.destroy();
+  if (monthlyChart) {
+    monthlyChart.destroy();
+  }
 
   monthlyChart = new Chart(ctx, {
-    type: "bar",
+    type: "line",
     data: {
-      labels,
+      labels: data.labels,
       datasets: [
         {
           label: "Dani",
-          data: dani,
-          backgroundColor: "rgba(120,200,255,0.7)",
-          stack: "stack1",
+          data: data.dani,
+          borderColor: "#4fc3f7",
+          backgroundColor: "rgba(79,195,247,0.15)",
+          tension: 0.35,
+          fill: false
         },
         {
           label: "Debi",
-          data: debi,
-          backgroundColor: "rgba(255,140,200,0.7)",
-          stack: "stack1",
+          data: data.debi,
+          borderColor: "#f48fb1",
+          backgroundColor: "rgba(244,143,177,0.15)",
+          tension: 0.35,
+          fill: false
         },
         {
           label: "Total",
-          data: total,
-          backgroundColor: "rgba(120,200,120,0.5)",
-        },
-      ],
+          data: data.total,
+          borderColor: "#66bb6a",
+          backgroundColor: "rgba(102,187,106,0.2)",
+          tension: 0.35,
+          borderWidth: 3,
+          fill: false
+        }
+      ]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
-        legend: { position: "bottom" },
+        legend: {
+          position: "bottom",
+          labels: { boxWidth: 12 }
+        }
       },
       scales: {
-        x: { stacked: true },
-        y: { stacked: true },
-      },
-    },
+        y: {
+          ticks: {
+            callback: v => Math.round(v)
+          }
+        }
+      }
+    }
   });
 }
+
 
 function setMonths(m) {
   monthsFilter = m;
@@ -363,18 +369,21 @@ document.getElementById("card-dani").onclick = () => {
   state.filter = "Dani";
   renderJobs();
   renderExpenses();
+  renderMonthlyChart("Dani")
 };
 
 document.getElementById("card-debi").onclick = () => {
   state.filter = "Debi";
   renderJobs();
   renderExpenses();
+  renderMonthlyChart("Debi")
 };
 
 document.getElementById("card-total").onclick = () => {
   state.filter = "ALL";
   renderJobs();
   renderExpenses();
+  renderMonthlyChart("Total")
 };
 
 document.getElementById("card-pending").onclick = () => {
@@ -416,26 +425,6 @@ function format(n) {
   });
 }
 
-function testPie() {
-  const ctx = document.getElementById("pieChart");
-  if (!ctx) return;
-
-  new Chart(ctx, {
-    type: "pie",
-    data: {
-      labels: ["Dani", "Debi", "Externos"],
-      datasets: [{
-        data: [50, 30, 20],
-        backgroundColor: ["#4fc3f7", "#f48fb1", "#9e9e9e"]
-      }]
-    },
-    options: {
-      plugins: {
-        legend: { position: "bottom" }
-      }
-    }
-  });
-}
 
 function testMonthly() {
   const ctx = document.getElementById("monthlyChart");
@@ -473,7 +462,5 @@ function testMonthly() {
 }
 
 document.addEventListener("DOMContentLoaded", testMonthly);
-
-document.addEventListener("DOMContentLoaded", testPie);
 
 document.getElementById("unlockBtn")?.addEventListener("click", unlock);
