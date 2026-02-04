@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 
   <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -18,7 +19,7 @@
 
   <!-- APP -->
   <div id="app" class="hidden">
-  <h1>Nuestro Súper Dashboard y Balance</h1>
+  <h1>Nuestro Súper Dashboard</h1>
 
   <!-- DASHBOARD -->
   <section class="dashboard">
@@ -34,6 +35,10 @@
       <div class="sub">Ganancia Debi: <span id="gain-debi">0</span></div>
     </div>
 
+    <section class="charts-center">
+      <canvas id="pieChart" height="180"></canvas>
+    </section>
+    
     <div class="card total" id="card-total">
       <h3>Ganancia Total</h3>
       <div class="amount" id="balance-total">0</div>
@@ -44,6 +49,18 @@
       <div class="amount" id="balance-summary"></div>
       <div class="sub">Pendiente terceros: <span id="balance-pending">0</span></div>
     </div>
+  </section>
+
+  <!-- GRAPH -->
+  <section class="chart-wide">
+    <div class="chart-filters">
+      <button onclick="setMonths(3)">3M</button>
+      <button onclick="setMonths(6)" class="active">6M</button>
+      <button onclick="setMonths(12)">12M</button>
+      <button onclick="setMonths(24)">24M</button>
+    </div>
+  
+    <canvas id="monthlyChart" height="120"></canvas>
   </section>
 
   <!-- TABS -->
