@@ -23,30 +23,46 @@ function unlock() {
 
 /* ================= GRAPHS ================= */
 function getMonthlyData(filter = "all") {
+
+  const now = new Date();
   const map = {};
 
   state.jobs.forEach(j => {
+
+    if (!j.Fecha) return;
+
     const who = j.Factura;
+
     if (filter === "dani" && who !== "Dani") return;
     if (filter === "debi" && who !== "Debi") return;
     if (who !== "Dani" && who !== "Debi") return;
 
     const date = new Date(j.Fecha);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
+    const diffMonths =
+      (now.getFullYear() - date.getFullYear()) * 12 +
+      (now.getMonth() - date.getMonth());
+
+    if (diffMonths >= monthsFilter) return;
+
+    const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
 
     if (!map[key]) {
       map[key] = { dani: 0, debi: 0 };
     }
 
     const amount = Number(j.Monto_USD) || 0;
+
     if (who === "Dani") map[key].dani += amount;
     if (who === "Debi") map[key].debi += amount;
+
   });
 
   const labels = Object.keys(map).sort();
+
   const dani = labels.map(m => map[m].dani);
   const debi = labels.map(m => map[m].debi);
-  const total = labels.map((_, i) => dani[i] + debi[i]);
+  const total = labels.map((_,i)=> dani[i] + debi[i]);
 
   return { labels, dani, debi, total };
 }
@@ -162,6 +178,7 @@ function setMonths(m) {
   event.target.classList.add("active");
 
   renderMonthlyChart();
+  groupJobsByMonth();
 }
 
 
